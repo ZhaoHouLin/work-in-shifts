@@ -1,0 +1,32 @@
+[
+  {
+    "name": "主任",
+    "phone": "0912-345-678",
+    "email": "abc@def.com.tw"
+  },
+  {
+    "name": "主任電話值班",
+    "phone": "0912-345-678",
+    "email": "abc@def.com.tw"
+  },
+  {
+    "name": "科長",
+    "phone": "0987-654-321",
+    "email": "def@abc.com.tw"
+  },
+  {
+    "name": "科長電話值班",
+    "phone": "0987-654-321",
+    "email": "def@abc.com.tw"
+  },
+  {
+    "name": "Judy",
+    "phone": "0912-345-678",
+    "email": "abc@def.com.tw"
+  },
+  {
+    "name": "Andy",
+    "phone": "0987-654-321",
+    "email": "def@abc.com.tw"
+  }
+]

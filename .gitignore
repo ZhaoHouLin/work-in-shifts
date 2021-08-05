@@ -6,8 +6,8 @@ dist-ssr
 directorData.json
 employeeData.json
 
-fakeDirectorData.json
-fakeEmployeeData.json
+# fakeDirectorData.json
+# fakeEmployeeData.json
 
 deploy.sh
 
