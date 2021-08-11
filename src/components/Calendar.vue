@@ -6,10 +6,11 @@ import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
 import { onMounted } from '@vue/runtime-core';
 import holidayData from '../data/110.json'
-// import employeeData from '../data/employeeData.json'
-// import directorData from '../data/directorData.json'
-import employeeData from '../data/fakeEmployeeData.json'
-import directorData from '../data/fakeDirectorData.json'
+
+import employeeData from '../data/employeeData.json'
+import directorData from '../data/directorData.json'
+// import employeeData from '../data/fakeEmployeeData.json'
+// import directorData from '../data/fakeDirectorData.json'
 
 export default {
   components: {
@@ -450,7 +451,7 @@ export default {
     h1 資訊室排班囉
     h5 created by ZhaoHouLin
     
-VueCal.weekdays(
+VueCal.calendar(
   :events='events' active-view="month" 
   :disable-views="['years', 'year']" locale="zh-hk"
   :show-all-day-events="['short', true, false][showAllDayEvents]"
@@ -575,11 +576,12 @@ secondary_color = #e4f5ef
         cursor pointer
         font-size 1rem
         margin-left 8px
-.weekdays 
-  width 100%
 
-.weekend
-  width 28%
+
+.calendar 
+  width 100%
+  position absolute
+  z-index 1
 
 
 .startTime,.endTime
