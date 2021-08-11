@@ -414,65 +414,74 @@ export default {
 </script>
 
 <template lang="pug">
-.switch
-  button(@click='handleOpen' :class='["fas","fa-bars",{"fa-times": isOpen}]')
+.calendar
 
-//- .menu(:class='[{"open": isOpen}]')
-.menu(:class='["animate__animated",{"animate__fadeInLeft": isOpen},{"open": isOpen}]')
-  
-  .date
-    .startTime
-      h3 開始日期
-      input(type='date' v-model='startTime')
-    .endTime
-      h3 結束日期
-      input(type='date' v-model='endTime')
-  
-  .list
-    .employeeList 
-      h3 排班人員
-      div(v-for='(item,id) in employeeList' :key='item.name') 
-        h4 {{item.name}}
-        //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
-        button.fas.fa-plus-square(@click='handleEmployeeList(item)')
+  .switch
+    button(@click='handleOpen' :class='["fas","fa-bars",{"fa-times": isOpen}]')
 
-    i.fas.fa-arrow-right
-
-    .arrangeEmployeeList 
-      h3 排班順序
-      div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
-        h4 {{formatTime(id+1)}}. {{item.name}} 
-        button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
-
-  .input
-    button(@click='arrange') 排班
-    button(@click='createCsvFile') .csv班表下載
-  .designInfo
-    h1 資訊室排班囉
-    h5 created by ZhaoHouLin
+  //- .menu(:class='[{"open": isOpen}]')
+  .menu(:class='["animate__animated",{"animate__fadeInLeft": isOpen},{"open": isOpen}]')
     
-VueCal.calendar(
-  :events='events' active-view="month" 
-  :disable-views="['years', 'year']" locale="zh-hk"
-  :show-all-day-events="['short', true, false][showAllDayEvents]"
-  :events-on-month-view="[true, 'short'][shortEventsOnMonthView * 1]"
-  :hide-weekdays="[]"
-  :editable-events="{ title: true, drag: false, resize: true, delete: true, create: true }"
-)
+    .date
+      .startTime
+        h3 開始日期
+        input(type='date' v-model='startTime')
+      .endTime
+        h3 結束日期
+        input(type='date' v-model='endTime')
+    
+    .list
+      .employeeList 
+        h3 排班人員
+        div(v-for='(item,id) in employeeList' :key='item.name') 
+          h4 {{item.name}}
+          //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
+          button.fas.fa-plus-square(@click='handleEmployeeList(item)')
 
-//- VueCal.weekend(
-//-   :events='events' active-view="month" 
-//-   :disable-views="['years', 'year']" locale="zh-hk"
-//-   :show-all-day-events="['short', true, false][showAllDayEvents]"
-//-   :events-on-month-view="[true, 'short'][shortEventsOnMonthView * 1]"
-//-   :hide-weekdays="[1,2,3,4,5]"
-//- )
+      i.fas.fa-arrow-right
+
+      .arrangeEmployeeList 
+        h3 排班順序
+        div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
+          h4 {{formatTime(id+1)}}. {{item.name}} 
+          button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
+
+    .input
+      button(@click='arrange') 排班
+      button(@click='createCsvFile') .csv班表下載
+    .designInfo
+      h1 資訊室排班囉
+      h5 created by ZhaoHouLin
+      
+  VueCal.calendar(
+    :events='events' active-view="month" 
+    :disable-views="['years', 'year']" locale="zh-hk"
+    :show-all-day-events="['short', true, false][showAllDayEvents]"
+    :events-on-month-view="[true, 'short'][shortEventsOnMonthView * 1]"
+    :hide-weekdays="[]"
+    :editable-events="{ title: true, drag: false, resize: true, delete: true, create: true }"
+  )
+
+  //- VueCal.weekend(
+  //-   :events='events' active-view="month" 
+  //-   :disable-views="['years', 'year']" locale="zh-hk"
+  //-   :show-all-day-events="['short', true, false][showAllDayEvents]"
+  //-   :events-on-month-view="[true, 'short'][shortEventsOnMonthView * 1]"
+  //-   :hide-weekdays="[1,2,3,4,5]"
+  //- )
 
 </template>
 
 <style lang="stylus" >
 primary_color = #42b983
 secondary_color = #e4f5ef
+
+.calendar 
+  width 100%
+  height 100vh
+  position absolute
+  z-index 1
+
 
 .vuecal__flex.vuecal__menu
   background-color primary_color
@@ -576,12 +585,6 @@ secondary_color = #e4f5ef
         cursor pointer
         font-size 1rem
         margin-left 8px
-
-
-.calendar 
-  width 100%
-  position absolute
-  z-index 1
 
 
 .startTime,.endTime
