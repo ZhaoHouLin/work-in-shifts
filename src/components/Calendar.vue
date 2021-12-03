@@ -22,8 +22,11 @@ export default {
     const shortEventsOnMonthView = ref(false)
 
     const arrangeEmployeeList = ref([])
+    const arrangeWeekendEmployeeList = ref([])
 
     const employeeList = ref(employeeData)
+    const employeeWeekendList = ref([])
+    employeeWeekendList.value = employeeList.value.concat()  //做職員資料深拷貝
     const directorList = ref(directorData)
 
     const today = new Date()
@@ -116,7 +119,7 @@ export default {
     }
 
 
-    // 處理排班人員
+    // 處理平日排班人員
     const handleEmployeeList = (item)=> {
       let had = arrangeEmployeeList.value.some((element)=> {            //檢查順序名單已經存在排班名單人員?
         return element.name === item .name
@@ -131,7 +134,7 @@ export default {
       });
     }
 
-    // 處理排班順序名單
+    // 處理平日排班順序名單
     const handleArrangeEmployeeList = (item)=> {
       let had = employeeList.value.some((element)=> {                   //檢查排班名單已經存在順序名單人員?
         return element.name === item .name
@@ -140,6 +143,37 @@ export default {
         employeeList.value.push(item)
       }
       arrangeEmployeeList.value.forEach((element,idx,arr) => {          //刪除順序名單人員
+        if (item.name === element.name) {
+          arr.splice(idx,1)
+        }
+      });
+    }
+
+
+    // 處理假日排班人員
+    const handleWeekendEmployeeList = (item)=> {
+      let had = arrangeWeekendEmployeeList.value.some((element)=> {            //檢查順序名單已經存在排班名單人員?
+        return element.name === item .name
+      })
+      if (!had) {
+        arrangeWeekendEmployeeList.value.push(item)
+      }
+      employeeWeekendList.value.forEach((element,idx,arr) => {                 //刪除排班名單人員
+        if (item.name === element.name) {
+          arr.splice(idx,1)
+        }
+      });
+    }
+
+    // 處理假日排班順序名單
+    const handleWeekendArrangeEmployeeList = (item)=> {
+      let had = employeeWeekendList.value.some((element)=> {                   //檢查排班名單已經存在順序名單人員?
+        return element.name === item .name
+      })
+      if (!had) {
+        employeeWeekendList.value.push(item)
+      }
+      arrangeWeekendEmployeeList.value.forEach((element,idx,arr) => {          //刪除順序名單人員
         if (item.name === element.name) {
           arr.splice(idx,1)
         }
@@ -267,15 +301,15 @@ export default {
             start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
             end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
             title: `
-            <h3 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].name}</h3>
-            <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].phone}</h5>
-            <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].email}</h5>
+            <h3 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].name}</h3>
+            <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].phone}</h5>
+            <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].email}</h5>
             `,
-            name: `${arrangeEmployeeList.value[peopleCounter].name}`
+            name: `${arrangeWeekendEmployeeList.value[peopleCounter].name}`
           })
           peopleCounter+=1
         }
-        if(peopleCounter>=arrangeEmployeeList.value.length) peopleCounter = 0
+        if(peopleCounter>=arrangeWeekendEmployeeList.value.length) peopleCounter = 0
       }
     }
 
@@ -301,15 +335,15 @@ export default {
               `,
               name: `${directorList.value[3].name}`
             },
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 4px">本周小組長: ${directorList.value[4].name}</h3>
+            // {
+            //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+            //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+            //   title: `
+            //   <h3 style="margin: 4px">本周小組長: ${directorList.value[4].name}</h3>
 
-              `,
-              name: `${directorList.value[4].name}`
-            }
+            //   `,
+            //   name: `${directorList.value[4].name}`
+            // }
           )
         } else if(addDay.getDay() === 0 && theWeek(addDay)%2!==0){
           events.push(
@@ -349,15 +383,15 @@ export default {
               `,
               name: `${directorList.value[1].name}`
             },
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 4px">本周小組長: ${directorList.value[5].name}</h3>
+            // {
+            //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+            //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+            //   title: `
+            //   <h3 style="margin: 4px">本周小組長: ${directorList.value[5].name}</h3>
    
-              `,
-              name: `${directorList.value[5].name}`
-            }
+            //   `,
+            //   name: `${directorList.value[5].name}`
+            // }
           )
         }
 
@@ -402,10 +436,14 @@ export default {
       handleOpen,
       isOpen,
       employeeList,
+      employeeWeekendList,
       directorList,
       arrangeEmployeeList,
+      arrangeWeekendEmployeeList,
       handleEmployeeList,
       handleArrangeEmployeeList,
+      handleWeekendEmployeeList,
+      handleWeekendArrangeEmployeeList,
       formatTime,
       createCsvFile
     }
@@ -431,20 +469,32 @@ export default {
         input(type='date' v-model='endTime')
     
     .list
-      .employeeList 
-        h3 排班人員
-        div(v-for='(item,id) in employeeList' :key='item.name') 
-          h4 {{item.name}}
-          //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
-          button.fas.fa-plus-square(@click='handleEmployeeList(item)')
-
-      i.fas.fa-arrow-right
-
-      .arrangeEmployeeList 
-        h3 排班順序
-        div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
-          h4 {{formatTime(id+1)}}. {{item.name}} 
-          button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
+      .weekdaysList
+        .employeeList 
+          h3 平日排班人員
+          div(v-for='(item,id) in employeeList' :key='item.name') 
+            h4 {{item.name}}
+            //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
+            button.fas.fa-plus-square(@click='handleEmployeeList(item)')
+        i.fas.fa-arrow-right
+        .arrangeEmployeeList 
+          h3 平日排班順序
+          div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
+            h4 {{formatTime(id+1)}}. {{item.name}} 
+            button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
+      .weekendList
+        .employeeList 
+          h3 假日排班人員
+          div(v-for='(item,id) in employeeWeekendList' :key='item.name') 
+            h4 {{item.name}}
+            //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
+            button.fas.fa-plus-square(@click='handleWeekendEmployeeList(item)')
+        i.fas.fa-arrow-right
+        .arrangeEmployeeList 
+          h3 假日排班順序
+          div(v-for='(item,id) in arrangeWeekendEmployeeList' :key='item.name')
+            h4 {{formatTime(id+1)}}. {{item.name}} 
+            button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)')
 
     .input
       button(@click='arrange') 排班
@@ -510,7 +560,7 @@ secondary_color = #e4f5ef
 
 .menu
   padding 8px
-  width 30%
+  width 50%
   height calc(100vh - 46px)
   background-color rgba(66,185,131,0.9)
   z-index 2
@@ -567,24 +617,33 @@ secondary_color = #e4f5ef
       position absolute
       top 50%
       transform translate(-50%,-50%)
-    .employeeList,.arrangeEmployeeList
-      h3
-        margin-bottom 12px
-    .employeeList div,.arrangeEmployeeList div
-      color #222
-      background-color secondary_color
+
+    .weekdaysList,.weekendList
+      width 50%
       display flex
-      justify-content flex-start
-      align-items center
-      margin-bottom 4px
-      padding 4px 8px
-      border-radius 4px
-      button
-        border none
-        color primary_color
-        cursor pointer
-        font-size 1rem
-        margin-left 8px
+      justify-content center
+      // border 1px solid #222
+      .arrangeEmployeeList
+        margin-left 2rem
+      .employeeList,.arrangeEmployeeList
+        h3
+          margin-bottom 12px
+
+      .employeeList div,.arrangeEmployeeList div
+        color #222
+        background-color secondary_color
+        display flex
+        justify-content center
+        align-items center
+        margin-bottom 4px
+        padding 4px 8px
+        border-radius 4px
+        button
+          border none
+          color primary_color
+          cursor pointer
+          font-size 1rem
+          margin-left 8px
 
 
 .startTime,.endTime
