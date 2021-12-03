@@ -5,7 +5,7 @@ import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
 import { onMounted } from '@vue/runtime-core';
-import holidayData from '../data/110.json'
+import holidayData from '../data/holidayData.json'
 
 import employeeData from '../data/employeeData.json'
 import directorData from '../data/directorData.json'
