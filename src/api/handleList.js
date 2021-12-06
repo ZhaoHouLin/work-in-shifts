@@ -1,6 +1,7 @@
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 
 import employeeData from '../data/employeeData.json'
+// import employeeData from '../data/fakeEmployeeData.json'
 
 
 const fn = ()=> {

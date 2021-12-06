@@ -1,17 +1,15 @@
 <script>
 
-import { reactive, ref } from '@vue/reactivity';
+import { ref } from '@vue/reactivity';
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
 import { onMounted } from '@vue/runtime-core';
 
-import { apiConvertor, apiHandleList } from '../api'
+import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
 
-import holidayData from '../data/holidayData.json'
-// import employeeData from '../data/employeeData.json'
+// import holidayData from '../data/holidayData.json'
 import directorData from '../data/directorData.json'
-// import employeeData from '../data/fakeEmployeeData.json'
 // import directorData from '../data/fakeDirectorData.json'
 
 export default {
@@ -25,19 +23,16 @@ export default {
 
     const directorList = ref(directorData)
 
-    const today = new Date()
 
-    const formatTime = (val) => {                           //Ê†ºÂºèÂåñÊôÇÈñì(00:00)
-      let dTimes = '00' + val
-      return `${dTimes.substring(dTimes.length - 2)}`
-    }
+    const { formatTime,startTime,endTime } = apiTime()
 
-
-    let formatMonth = formatTime(today.getMonth() + 1)
-    let formatDate = formatTime(today.getDate())
-
-    const startTime = ref(`${today.getFullYear()}-${formatMonth}-${formatDate}`)
-    const endTime = ref(`${today.getFullYear()}-${formatMonth}-${formatDate}`)
+    const { 
+      arrangeDate,
+      arrangeWeekendDate,
+      arrangeDirectList,
+      arrange,
+      handleHoliday 
+    } = apiArrangeDateList()
 
     const { 
       arrangeEmployeeList,
@@ -59,7 +54,7 @@ export default {
       isOpen.value = !isOpen.value
     }
 
-    // Âà§Êñ∑ÂñÆÈõôÂë®Á®ãÂºè
+    // ßP¬_≥Ê¬˘©Pµ{¶°
     const theWeek= (now)=> {
       let totalDays = 0;
       // let now = new Date();
@@ -79,7 +74,7 @@ export default {
       days[10] = 30;
       days[11] = 31;
       
-      // Âà§Êñ∑ÊòØÂê¶ÁÇ∫ÈñèÂπ¥,ÈáùÂ∞ç2ÊúàÁöÑÂ§©Êï∏ÈÄ≤Ë°åË®àÁÆó
+      // ßP¬_¨Oß_¨∞∂|¶~,∞wπÔ2§Î™∫§—º∆∂i¶Ê≠p∫‚
       if (Math.round(now.getYear() / 4) == now.getYear() / 4) {
         days[1] = 29
       } else {
@@ -94,204 +89,204 @@ export default {
         }
         totalDays = totalDays + now.getDate();
       }
-      // ÂæóÂà∞Á¨¨ÂπæÂë®
+      // ±o®Ï≤ƒ¥X©P
       let week = Math.round(totalDays / 7);
       // console.log(week);
       return week;
     }
 
-    // Êó•ÊúüÊèíÂÖ•-Â≠ó‰∏≤
-    const insertStr = (source,first,second, newStr) => {
-      return source.slice(0, first) + newStr + source.slice(first,6) + newStr + source.slice(second)
-    }
+    // // §È¥¡¥°§J-¶r¶Í
+    // const insertStr = (source,first,second, newStr) => {
+    //   return source.slice(0, first) + newStr + source.slice(first,6) + newStr + source.slice(second)
+    // }
 
-    // ÂúãÂÆöÂÅáÊó•
-    const handleHoliday = ()=> {
-      // console.log(startTime.value);
-      holidayData.forEach(element => {
-        if (element['\u662f\u5426\u653e\u5047']==='2') {
-          events.push({
-            start: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 00:00`,
-            end: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 23:59`,
-            title: `
-            <h4 style="width:100%; height:20px;margin: 0px; color: #f00; ">${element["\u5099\u8a3b"]||'ÂÅáÊó•'}</h4>
-            `
-          })
-        }
-      });
-    }
+    // // ∞Í©w∞≤§È
+    // const handleHoliday = ()=> {
+    //   // console.log(startTime.value);
+    //   holidayData.forEach(element => {
+    //     if (element['\u662f\u5426\u653e\u5047']==='2') {
+    //       events.push({
+    //         start: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 00:00`,
+    //         end: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 23:59`,
+    //         title: `
+    //         <h4 style="width:100%; height:20px;margin: 0px; color: #f00; ">${element["\u5099\u8a3b"]||'∞≤§È'}</h4>
+    //         `
+    //       })
+    //     }
+    //   });
+    // }
 
 
-    // Âπ≥Êó•ÊéíÁè≠
-    const arrangeDate = (startDayTime,plusDays,endDayTime)=> { 
-      let peopleCounter = 0
+    // // •≠§È±∆ØZ
+    // const arrangeDate = (startDayTime,plusDays,endDayTime)=> { 
+    //   let peopleCounter = 0
 
-      for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-        if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //Âà§Êñ∑Â¢ûÂä†ÁöÑÂ§©Êï∏ÊúâÁÑ°Ë∂ÖÈÅéÁµêÊùüÊó•Êúü
-        let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
+    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //ßP¬_ºW•[™∫§—º∆¶≥µL∂WπLµ≤ßÙ§È¥¡
+    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
 
-        let addDayMonth = formatTime(addDay.getMonth() + 1)
-        let addDayDate = formatTime(addDay.getDate())
-        let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
+    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
+    //     let addDayDate = formatTime(addDay.getDate())
+    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
 
-        let ans = holidayData.some((element)=> {
-          return (element["\u662f\u5426\u653e\u5047"] === '0' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
-        })
+    //     let ans = holidayData.some((element)=> {
+    //       return (element["\u662f\u5426\u653e\u5047"] === '0' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
+    //     })
    
-        if (ans) {
-          events.push({
-            start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-            end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-            title: `
-            <h3 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].name}</h3>
-            <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].phone}</h5>
-            <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].email}</h5>
-            `,
-            name: `${arrangeEmployeeList.value[peopleCounter].name}`
-          })
-          peopleCounter+=1
-        }
-        if(peopleCounter>=arrangeEmployeeList.value.length) peopleCounter = 0
-      }
-    }
+    //     if (ans) {
+    //       events.push({
+    //         start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //         end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //         title: `
+    //         <h3 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].name}</h3>
+    //         <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].phone}</h5>
+    //         <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].email}</h5>
+    //         `,
+    //         name: `${arrangeEmployeeList.value[peopleCounter].name}`
+    //       })
+    //       peopleCounter+=1
+    //     }
+    //     if(peopleCounter>=arrangeEmployeeList.value.length) peopleCounter = 0
+    //   }
+    // }
 
-    // ÂÅáÊó•ÊéíÁè≠
-    const arrangeWeekendDate = (startDayTime,plusDays,endDayTime)=> {
-      let peopleCounter = 0
-      for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-        if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //Âà§Êñ∑Â¢ûÂä†ÁöÑÂ§©Êï∏ÊúâÁÑ°Ë∂ÖÈÅéÁµêÊùüÊó•Êúü
-        let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
+    // // ∞≤§È±∆ØZ
+    // const arrangeWeekendDate = (startDayTime,plusDays,endDayTime)=> {
+    //   let peopleCounter = 0
+    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //ßP¬_ºW•[™∫§—º∆¶≥µL∂WπLµ≤ßÙ§È¥¡
+    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
 
-        let addDayMonth = formatTime(addDay.getMonth() + 1)
-        let addDayDate = formatTime(addDay.getDate())
-        let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
+    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
+    //     let addDayDate = formatTime(addDay.getDate())
+    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
 
-        let ans = holidayData.some((element)=> {
-          return (element["\u662f\u5426\u653e\u5047"] === '2' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
-        })
+    //     let ans = holidayData.some((element)=> {
+    //       return (element["\u662f\u5426\u653e\u5047"] === '2' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
+    //     })
 
-        if (ans) {
-          events.push({
-            start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-            end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-            title: `
-            <h3 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].name}</h3>
-            <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].phone}</h5>
-            <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].email}</h5>
-            `,
-            name: `${arrangeWeekendEmployeeList.value[peopleCounter].name}`
-          })
-          peopleCounter+=1
-        }
-        if(peopleCounter>=arrangeWeekendEmployeeList.value.length) peopleCounter = 0
-      }
-    }
+    //     if (ans) {
+    //       events.push({
+    //         start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //         end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //         title: `
+    //         <h3 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].name}</h3>
+    //         <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].phone}</h5>
+    //         <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].email}</h5>
+    //         `,
+    //         name: `${arrangeWeekendEmployeeList.value[peopleCounter].name}`
+    //       })
+    //       peopleCounter+=1
+    //     }
+    //     if(peopleCounter>=arrangeWeekendEmployeeList.value.length) peopleCounter = 0
+    //   }
+    // }
 
-    // ‰∏ªÁÆ°Âë®Êú´ÊéíÁè≠
-    const arrangeDirectList = (startDayTime,plusDays,endDayTime)=> {
-      let peopleCounter = 0
-      for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-        if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //Âà§Êñ∑Â¢ûÂä†ÁöÑÂ§©Êï∏ÊúâÁÑ°Ë∂ÖÈÅéÁµêÊùüÊó•Êúü
-        let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
-        console.log();
-        let addDayMonth = formatTime(addDay.getMonth() + 1)
-        let addDayDate = formatTime(addDay.getDate())
-        let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
+    // // •D∫ﬁ©P•Ω±∆ØZ
+    // const arrangeDirectList = (startDayTime,plusDays,endDayTime)=> {
+    //   let peopleCounter = 0
+    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //ßP¬_ºW•[™∫§—º∆¶≥µL∂WπLµ≤ßÙ§È¥¡
+    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
+    //     console.log();
+    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
+    //     let addDayDate = formatTime(addDay.getDate())
+    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
 
-        // console.log(addDay.getDay());
-        if(addDay.getDay() === 6 && theWeek(addDay)%2!==0){
-          events.push(
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 2px">Êú¨Âë®‰∏ªÁÆ°: ${directorList.value[3].name}</h3>
-              `,
-              name: `${directorList.value[3].name}`
-            },
-            // {
-            //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-            //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-            //   title: `
-            //   <h3 style="margin: 4px">Êú¨Âë®Â∞èÁµÑÈï∑: ${directorList.value[4].name}</h3>
+    //     // console.log(addDay.getDay());
+    //     if(addDay.getDay() === 6 && theWeek(addDay)%2!==0){
+    //       events.push(
+    //         {
+    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //           title: `
+    //           <h3 style="margin: 2px">•ª©P•D∫ﬁ: ${directorList.value[3].name}</h3>
+    //           `,
+    //           name: `${directorList.value[3].name}`
+    //         },
+    //         // {
+    //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //         //   title: `
+    //         //   <h3 style="margin: 4px">•ª©P§p≤’™¯: ${directorList.value[4].name}</h3>
 
-            //   `,
-            //   name: `${directorList.value[4].name}`
-            // }
-          )
-        } else if(addDay.getDay() === 0 && theWeek(addDay)%2!==0){
-          events.push(
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 2px">Êú¨Âë®‰∏ªÁÆ°: ${directorList.value[2].name}</h3>
+    //         //   `,
+    //         //   name: `${directorList.value[4].name}`
+    //         // }
+    //       )
+    //     } else if(addDay.getDay() === 0 && theWeek(addDay)%2!==0){
+    //       events.push(
+    //         {
+    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //           title: `
+    //           <h3 style="margin: 2px">•ª©P•D∫ﬁ: ${directorList.value[2].name}</h3>
 
-              `,
-              name: `${directorList.value[2].name}`
-            }
-          )
-        }
+    //           `,
+    //           name: `${directorList.value[2].name}`
+    //         }
+    //       )
+    //     }
 
 
-        if(addDay.getDay() === 6 && theWeek(addDay)%2===0){
-          events.push(
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 2px">Êú¨Âë®‰∏ªÁÆ°: ${directorList.value[0].name}</h3>
+    //     if(addDay.getDay() === 6 && theWeek(addDay)%2===0){
+    //       events.push(
+    //         {
+    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //           title: `
+    //           <h3 style="margin: 2px">•ª©P•D∫ﬁ: ${directorList.value[0].name}</h3>
  
-              `,
-              name: `${directorList.value[0].name}`
-            }
-          )
-        } else if(addDay.getDay() === 0 && theWeek(addDay)%2===0){
-          events.push(
-            {
-              start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-              end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-              title: `
-              <h3 style="margin: 2px">Êú¨Âë®‰∏ªÁÆ°: ${directorList.value[1].name}</h3>
+    //           `,
+    //           name: `${directorList.value[0].name}`
+    //         }
+    //       )
+    //     } else if(addDay.getDay() === 0 && theWeek(addDay)%2===0){
+    //       events.push(
+    //         {
+    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //           title: `
+    //           <h3 style="margin: 2px">•ª©P•D∫ﬁ: ${directorList.value[1].name}</h3>
 
-              `,
-              name: `${directorList.value[1].name}`
-            },
-            // {
-            //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-            //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-            //   title: `
-            //   <h3 style="margin: 4px">Êú¨Âë®Â∞èÁµÑÈï∑: ${directorList.value[5].name}</h3>
+    //           `,
+    //           name: `${directorList.value[1].name}`
+    //         },
+    //         // {
+    //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
+    //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
+    //         //   title: `
+    //         //   <h3 style="margin: 4px">•ª©P§p≤’™¯: ${directorList.value[5].name}</h3>
    
-            //   `,
-            //   name: `${directorList.value[5].name}`
-            // }
-          )
-        }
+    //         //   `,
+    //         //   name: `${directorList.value[5].name}`
+    //         // }
+    //       )
+    //     }
 
-      } 
-    }
+    //   } 
+    // }
 
-    // ÊéíÁè≠
-    const arrange = ()=> {
-      events.splice(0,events.length)
+    // // ±∆ØZ
+    // const arrange = ()=> {
+    //   events.splice(0,events.length)
 
-      let startDay = new Date(startTime.value)
-      let endDay = new Date(endTime.value)
-      let endDayTime = endDay.getTime()
-      let plusTimes = endDay.getTime()-startDay.getTime()
-      let plusDays = plusTimes/(1000*60*60*24)
+    //   let startDay = new Date(startTime.value)
+    //   let endDay = new Date(endTime.value)
+    //   let endDayTime = endDay.getTime()
+    //   let plusTimes = endDay.getTime()-startDay.getTime()
+    //   let plusDays = plusTimes/(1000*60*60*24)
 
-      if (arrangeEmployeeList.value.length === 0) {
-        arrangeEmployeeList.value = arrangeEmployeeList.value.concat(employeeList.value)
-        employeeList.value.splice(0,employeeList.value.length)
-      } 
+    //   if (arrangeEmployeeList.value.length === 0) {
+    //     arrangeEmployeeList.value = arrangeEmployeeList.value.concat(employeeList.value)
+    //     employeeList.value.splice(0,employeeList.value.length)
+    //   } 
       
-      handleHoliday()
-      arrangeDate(startDay.getTime(),plusDays,endDayTime)
-      arrangeWeekendDate(startDay.getTime(),plusDays,endDayTime)
-      arrangeDirectList(startDay.getTime(),plusDays,endDayTime)
-    }
+    //   handleHoliday()
+    //   arrangeDate(startDay.getTime(),plusDays,endDayTime)
+    //   arrangeWeekendDate(startDay.getTime(),plusDays,endDayTime)
+    //   arrangeDirectList(startDay.getTime(),plusDays,endDayTime)
+    // }
 
 
     onMounted(()=> {
@@ -303,8 +298,7 @@ export default {
       showAllDayEvents,
       shortEventsOnMonthView,
       arrange,
-      startTime,
-      endTime,
+ 
       handleHoliday,
       theWeek,
       handleOpen,
@@ -319,6 +313,8 @@ export default {
       handleWeekendEmployeeList,
       handleWeekendArrangeEmployeeList,
       formatTime,
+      startTime,
+      endTime,
       createCsvFile
     }
   }
@@ -336,45 +332,45 @@ export default {
     
     .date
       .startTime
-        h3 ÈñãÂßãÊó•Êúü
+        h3 ∂}©l§È¥¡
         input(type='date' v-model='startTime')
       .endTime
-        h3 ÁµêÊùüÊó•Êúü
+        h3 µ≤ßÙ§È¥¡
         input(type='date' v-model='endTime')
     
     .list
       .weekdaysList
         .employeeList 
-          h3 Âπ≥Êó•ÊéíÁè≠‰∫∫Âì°
+          h3 •≠§È±∆ØZ§H≠˚
           div(v-for='(item,id) in employeeList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
             button.fas.fa-plus-square(@click='handleEmployeeList(item)')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
-          h3 Âπ≥Êó•ÊéíÁè≠È†ÜÂ∫è
+          h3 •≠§È±∆ØZ∂∂ß«
           div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
             button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
       .weekendList
         .employeeList 
-          h3 ÂÅáÊó•ÊéíÁè≠‰∫∫Âì°
+          h3 ∞≤§È±∆ØZ§H≠˚
           div(v-for='(item,id) in employeeWeekendList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
             button.fas.fa-plus-square(@click='handleWeekendEmployeeList(item)')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
-          h3 ÂÅáÊó•ÊéíÁè≠È†ÜÂ∫è
+          h3 ∞≤§È±∆ØZ∂∂ß«
           div(v-for='(item,id) in arrangeWeekendEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
             button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)')
 
     .input
-      button(@click='arrange') ÊéíÁè≠
-      button(@click='createCsvFile') .csvÁè≠Ë°®‰∏ãËºâ
+      button(@click='arrange') ±∆ØZ
+      button(@click='createCsvFile') .csvØZ™Ì§U∏¸
     .designInfo
-      h1 Ë≥áË®äÂÆ§ÊéíÁè≠Âõâ
+      h1 ∏Í∞T´«±∆ØZ≈o
       h5 created by ZhaoHouLin
       
   VueCal.calendar(
