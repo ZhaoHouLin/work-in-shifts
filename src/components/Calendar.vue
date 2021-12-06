@@ -5,9 +5,11 @@ import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
 import { onMounted } from '@vue/runtime-core';
-import holidayData from '../data/holidayData.json'
 
-import employeeData from '../data/employeeData.json'
+import { apiConvertor, apiHandleList } from '../api'
+
+import holidayData from '../data/holidayData.json'
+// import employeeData from '../data/employeeData.json'
 import directorData from '../data/directorData.json'
 // import employeeData from '../data/fakeEmployeeData.json'
 // import directorData from '../data/fakeDirectorData.json'
@@ -21,12 +23,6 @@ export default {
     const showAllDayEvents = ref(0)
     const shortEventsOnMonthView = ref(false)
 
-    const arrangeEmployeeList = ref([])
-    const arrangeWeekendEmployeeList = ref([])
-
-    const employeeList = ref(employeeData)
-    const employeeWeekendList = ref([])
-    employeeWeekendList.value = employeeList.value.concat()  //做職員資料深拷貝
     const directorList = ref(directorData)
 
     const today = new Date()
@@ -43,142 +39,20 @@ export default {
     const startTime = ref(`${today.getFullYear()}-${formatMonth}-${formatDate}`)
     const endTime = ref(`${today.getFullYear()}-${formatMonth}-${formatDate}`)
 
-    const events = reactive([])
+    const { 
+      arrangeEmployeeList,
+      arrangeWeekendEmployeeList,
+      employeeList,
+      employeeWeekendList,
+      handleEmployeeList,
+      handleArrangeEmployeeList,
+      handleWeekendEmployeeList,
+      handleWeekendArrangeEmployeeList
+    } = apiHandleList()
+
+    const {events,JSONToExcelConvertor,createCsvFile} = apiConvertor()
 
     const isOpen = ref(false)
-
-
-
-    /**
-      * 匯出excel
-      * @param {Object} title        標題列key-val
-      * @param {Object} data         值列key-val
-      * @param {Object} fileName     檔名稱
-    **/
-    // 輸出成.csv下載
-    const JSONToExcelConvertor = (title, data, name) => {
-      let CSV = '';
-      let row = "";
-
-      for (let i = 0; i < title.length; i++) {
-        if(title[i].title){
-          row += title[i].title + ',';
-        }
-      }
-      row = row.slice(0, -1);
-      CSV += row + '\r\n'; 
-
-      for (let i = 0; i < data.length; i++) {
-        row = "";
-        for (let j = 0; j < title.length; j++) {
-          if(data[i]){
-            row += `${data[i][title[j][j]] ? data[i][title[j][j]] : ''},`
-          }
-        }
-        row.slice(0, row.length - 1);
-        CSV += row + '\r\n';
-      }
-
-      if (CSV == '') {
-        alert("Invalid data");
-        return;
-      }
-      // console.log(CSV);
-      let fileName = name;
-      let uri = new Blob(['\ufeff' + CSV], {type:"text/csv"});
-
-      if (window.navigator && window.navigator.msSaveOrOpenBlob) { // for IE
-        window.navigator.msSaveOrOpenBlob(CSV, fileName + ".csv");
-      } else { // for Non-IE（chrome、firefox etc.）
-        let link = document.createElement("a");
-        link.href = URL.createObjectURL(uri);
-
-        link.style = "visibility:hidden";
-        link.download = fileName + ".csv";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    }
-
-
-    const createCsvFile = ()=> {
-      let title = [
-        {
-          title: '日期',
-          0: 'start'
-        },
-        {
-          title:'值班人員',
-          1: 'name'
-        }
-      ]
-      // console.log(JSON.stringify(directorList.value));
-      JSONToExcelConvertor(title,events,'排班')
-
-    }
-
-
-    // 處理平日排班人員
-    const handleEmployeeList = (item)=> {
-      let had = arrangeEmployeeList.value.some((element)=> {            //檢查順序名單已經存在排班名單人員?
-        return element.name === item .name
-      })
-      if (!had) {
-        arrangeEmployeeList.value.push(item)
-      }
-      employeeList.value.forEach((element,idx,arr) => {                 //刪除排班名單人員
-        if (item.name === element.name) {
-          arr.splice(idx,1)
-        }
-      });
-    }
-
-    // 處理平日排班順序名單
-    const handleArrangeEmployeeList = (item)=> {
-      let had = employeeList.value.some((element)=> {                   //檢查排班名單已經存在順序名單人員?
-        return element.name === item .name
-      })
-      if (!had) {
-        employeeList.value.push(item)
-      }
-      arrangeEmployeeList.value.forEach((element,idx,arr) => {          //刪除順序名單人員
-        if (item.name === element.name) {
-          arr.splice(idx,1)
-        }
-      });
-    }
-
-
-    // 處理假日排班人員
-    const handleWeekendEmployeeList = (item)=> {
-      let had = arrangeWeekendEmployeeList.value.some((element)=> {            //檢查順序名單已經存在排班名單人員?
-        return element.name === item .name
-      })
-      if (!had) {
-        arrangeWeekendEmployeeList.value.push(item)
-      }
-      employeeWeekendList.value.forEach((element,idx,arr) => {                 //刪除排班名單人員
-        if (item.name === element.name) {
-          arr.splice(idx,1)
-        }
-      });
-    }
-
-    // 處理假日排班順序名單
-    const handleWeekendArrangeEmployeeList = (item)=> {
-      let had = employeeWeekendList.value.some((element)=> {                   //檢查排班名單已經存在順序名單人員?
-        return element.name === item .name
-      })
-      if (!had) {
-        employeeWeekendList.value.push(item)
-      }
-      arrangeWeekendEmployeeList.value.forEach((element,idx,arr) => {          //刪除順序名單人員
-        if (item.name === element.name) {
-          arr.splice(idx,1)
-        }
-      });
-    }
 
 
     const handleOpen = ()=> {
