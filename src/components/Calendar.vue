@@ -54,7 +54,7 @@ export default {
       isOpen.value = !isOpen.value
     }
 
-    // §PÂ_³æÂù©Pµ{¦¡
+    // åˆ¤æ–·å–®é›™å‘¨ç¨‹å¼
     const theWeek= (now)=> {
       let totalDays = 0;
       // let now = new Date();
@@ -74,7 +74,7 @@ export default {
       days[10] = 30;
       days[11] = 31;
       
-      // §PÂ_¬O§_¬°¶|¦~,°w¹ï2¤ëªº¤Ñ¼Æ¶i¦æ­pºâ
+      // åˆ¤æ–·æ˜¯å¦ç‚ºé–å¹´,é‡å°2æœˆçš„å¤©æ•¸é€²è¡Œè¨ˆç®—
       if (Math.round(now.getYear() / 4) == now.getYear() / 4) {
         days[1] = 29
       } else {
@@ -89,18 +89,18 @@ export default {
         }
         totalDays = totalDays + now.getDate();
       }
-      // ±o¨ì²Ä´X©P
+      // å¾—åˆ°ç¬¬å¹¾å‘¨
       let week = Math.round(totalDays / 7);
       // console.log(week);
       return week;
     }
 
-    // // ¤é´Á´¡¤J-¦r¦ê
+    // // æ—¥æœŸæ’å…¥-å­—ä¸²
     // const insertStr = (source,first,second, newStr) => {
     //   return source.slice(0, first) + newStr + source.slice(first,6) + newStr + source.slice(second)
     // }
 
-    // // °ê©w°²¤é
+    // // åœ‹å®šå‡æ—¥
     // const handleHoliday = ()=> {
     //   // console.log(startTime.value);
     //   holidayData.forEach(element => {
@@ -109,7 +109,7 @@ export default {
     //         start: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 00:00`,
     //         end: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 23:59`,
     //         title: `
-    //         <h4 style="width:100%; height:20px;margin: 0px; color: #f00; ">${element["\u5099\u8a3b"]||'°²¤é'}</h4>
+    //         <h4 style="width:100%; height:20px;margin: 0px; color: #f00; ">${element["\u5099\u8a3b"]||'å‡æ—¥'}</h4>
     //         `
     //       })
     //     }
@@ -117,12 +117,12 @@ export default {
     // }
 
 
-    // // ¥­¤é±Æ¯Z
+    // // å¹³æ—¥æ’ç­
     // const arrangeDate = (startDayTime,plusDays,endDayTime)=> { 
     //   let peopleCounter = 0
 
     //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //§PÂ_¼W¥[ªº¤Ñ¼Æ¦³µL¶W¹Lµ²§ô¤é´Á
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //åˆ¤æ–·å¢åŠ çš„å¤©æ•¸æœ‰ç„¡è¶…éçµæŸæ—¥æœŸ
     //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
 
     //     let addDayMonth = formatTime(addDay.getMonth() + 1)
@@ -150,11 +150,11 @@ export default {
     //   }
     // }
 
-    // // °²¤é±Æ¯Z
+    // // å‡æ—¥æ’ç­
     // const arrangeWeekendDate = (startDayTime,plusDays,endDayTime)=> {
     //   let peopleCounter = 0
     //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //§PÂ_¼W¥[ªº¤Ñ¼Æ¦³µL¶W¹Lµ²§ô¤é´Á
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //åˆ¤æ–·å¢åŠ çš„å¤©æ•¸æœ‰ç„¡è¶…éçµæŸæ—¥æœŸ
     //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
 
     //     let addDayMonth = formatTime(addDay.getMonth() + 1)
@@ -182,11 +182,11 @@ export default {
     //   }
     // }
 
-    // // ¥DºŞ©P¥½±Æ¯Z
+    // // ä¸»ç®¡å‘¨æœ«æ’ç­
     // const arrangeDirectList = (startDayTime,plusDays,endDayTime)=> {
     //   let peopleCounter = 0
     //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //§PÂ_¼W¥[ªº¤Ñ¼Æ¦³µL¶W¹Lµ²§ô¤é´Á
+    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //åˆ¤æ–·å¢åŠ çš„å¤©æ•¸æœ‰ç„¡è¶…éçµæŸæ—¥æœŸ
     //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
     //     console.log();
     //     let addDayMonth = formatTime(addDay.getMonth() + 1)
@@ -200,7 +200,7 @@ export default {
     //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //           title: `
-    //           <h3 style="margin: 2px">¥»©P¥DºŞ: ${directorList.value[3].name}</h3>
+    //           <h3 style="margin: 2px">æœ¬å‘¨ä¸»ç®¡: ${directorList.value[3].name}</h3>
     //           `,
     //           name: `${directorList.value[3].name}`
     //         },
@@ -208,7 +208,7 @@ export default {
     //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //         //   title: `
-    //         //   <h3 style="margin: 4px">¥»©P¤p²Õªø: ${directorList.value[4].name}</h3>
+    //         //   <h3 style="margin: 4px">æœ¬å‘¨å°çµ„é•·: ${directorList.value[4].name}</h3>
 
     //         //   `,
     //         //   name: `${directorList.value[4].name}`
@@ -220,7 +220,7 @@ export default {
     //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //           title: `
-    //           <h3 style="margin: 2px">¥»©P¥DºŞ: ${directorList.value[2].name}</h3>
+    //           <h3 style="margin: 2px">æœ¬å‘¨ä¸»ç®¡: ${directorList.value[2].name}</h3>
 
     //           `,
     //           name: `${directorList.value[2].name}`
@@ -235,7 +235,7 @@ export default {
     //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //           title: `
-    //           <h3 style="margin: 2px">¥»©P¥DºŞ: ${directorList.value[0].name}</h3>
+    //           <h3 style="margin: 2px">æœ¬å‘¨ä¸»ç®¡: ${directorList.value[0].name}</h3>
  
     //           `,
     //           name: `${directorList.value[0].name}`
@@ -247,7 +247,7 @@ export default {
     //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //           title: `
-    //           <h3 style="margin: 2px">¥»©P¥DºŞ: ${directorList.value[1].name}</h3>
+    //           <h3 style="margin: 2px">æœ¬å‘¨ä¸»ç®¡: ${directorList.value[1].name}</h3>
 
     //           `,
     //           name: `${directorList.value[1].name}`
@@ -256,7 +256,7 @@ export default {
     //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
     //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
     //         //   title: `
-    //         //   <h3 style="margin: 4px">¥»©P¤p²Õªø: ${directorList.value[5].name}</h3>
+    //         //   <h3 style="margin: 4px">æœ¬å‘¨å°çµ„é•·: ${directorList.value[5].name}</h3>
    
     //         //   `,
     //         //   name: `${directorList.value[5].name}`
@@ -267,7 +267,7 @@ export default {
     //   } 
     // }
 
-    // // ±Æ¯Z
+    // // æ’ç­
     // const arrange = ()=> {
     //   events.splice(0,events.length)
 
@@ -332,45 +332,45 @@ export default {
     
     .date
       .startTime
-        h3 ¶}©l¤é´Á
+        h3 é–‹å§‹æ—¥æœŸ
         input(type='date' v-model='startTime')
       .endTime
-        h3 µ²§ô¤é´Á
+        h3 çµæŸæ—¥æœŸ
         input(type='date' v-model='endTime')
     
     .list
       .weekdaysList
         .employeeList 
-          h3 ¥­¤é±Æ¯Z¤H­û
+          h3 å¹³æ—¥æ’ç­äººå“¡
           div(v-for='(item,id) in employeeList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
             button.fas.fa-plus-square(@click='handleEmployeeList(item)')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
-          h3 ¥­¤é±Æ¯Z¶¶§Ç
+          h3 å¹³æ—¥æ’ç­é †åº
           div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
             button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
       .weekendList
         .employeeList 
-          h3 °²¤é±Æ¯Z¤H­û
+          h3 å‡æ—¥æ’ç­äººå“¡
           div(v-for='(item,id) in employeeWeekendList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
             button.fas.fa-plus-square(@click='handleWeekendEmployeeList(item)')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
-          h3 °²¤é±Æ¯Z¶¶§Ç
+          h3 å‡æ—¥æ’ç­é †åº
           div(v-for='(item,id) in arrangeWeekendEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
             button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)')
 
     .input
-      button(@click='arrange') ±Æ¯Z
-      button(@click='createCsvFile') .csv¯Zªí¤U¸ü
+      button(@click='arrange') æ’ç­
+      button(@click='createCsvFile') .csvç­è¡¨ä¸‹è¼‰
     .designInfo
-      h1 ¸ê°T«Ç±Æ¯ZÅo
+      h1 è³‡è¨Šå®¤æ’ç­å›‰
       h5 created by ZhaoHouLin
       
   VueCal.calendar(
