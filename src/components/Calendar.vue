@@ -4,13 +4,9 @@ import { ref } from '@vue/reactivity';
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
-import { onMounted } from '@vue/runtime-core';
-
+import { computed, onMounted } from '@vue/runtime-core';
+import { useStore } from "vuex";
 import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
-
-// import holidayData from '../data/holidayData.json'
-import directorData from '../data/directorData.json'
-// import directorData from '../data/fakeDirectorData.json'
 
 export default {
   components: {
@@ -21,24 +17,58 @@ export default {
     const showAllDayEvents = ref(0)
     const shortEventsOnMonthView = ref(false)
 
-    const directorList = ref(directorData)
+
+    const employeeList = computed(()=> {
+      return store.getters.employeeListData
+    })
+
+    const arrangeEmployeeList = computed(()=> {
+      return store.getters.arrangeEmployeeListData
+    })
+
+    const employeeWeekendList = computed(()=> {
+      return store.getters.employeeWeekendListData
+    })
+
+    const arrangeWeekendEmployeeList = computed(()=> {
+      return store.getters.arrangeWeekendEmployeeListData
+    })
+
+    const directorList = computed(()=> {
+      return store.getters.directorListData
+    })
+
+    const store = useStore()
+
+    const { formatTime,theWeek } = apiTime()
+
+    const startTimeStatus = computed({
+      set(val) {
+        store.dispatch('commitStartTime',val)
+      },
+      get() {
+        return store.getters.startTimeData
+      }
+    })
+
+    const endTimeStatus = computed({
+      set(val) {
+        store.dispatch('commitEndTime',val)
+      },
+      get() {
+        return store.getters.endTimeData
+      }
+    })
 
 
-    const { formatTime,startTime,endTime } = apiTime()
+  
 
     const { 
-      arrangeDate,
-      arrangeWeekendDate,
-      arrangeDirectList,
       arrange,
       handleHoliday 
     } = apiArrangeDateList()
 
     const { 
-      arrangeEmployeeList,
-      arrangeWeekendEmployeeList,
-      employeeList,
-      employeeWeekendList,
       handleEmployeeList,
       handleArrangeEmployeeList,
       handleWeekendEmployeeList,
@@ -53,240 +83,6 @@ export default {
     const handleOpen = ()=> {
       isOpen.value = !isOpen.value
     }
-
-    // 判斷單雙周程式
-    const theWeek= (now)=> {
-      let totalDays = 0;
-      // let now = new Date();
-      let years = now.getYear()
-      if (years < 1000)
-          years += 1900
-      let days = new Array(12);
-      days[0] = 31;
-      days[2] = 31;
-      days[3] = 30;
-      days[4] = 31;
-      days[5] = 30;
-      days[6] = 31;
-      days[7] = 31;
-      days[8] = 30;
-      days[9] = 31;
-      days[10] = 30;
-      days[11] = 31;
-      
-      // 判斷是否為閏年,針對2月的天數進行計算
-      if (Math.round(now.getYear() / 4) == now.getYear() / 4) {
-        days[1] = 29
-      } else {
-        days[1] = 28
-      }
-      if (now.getMonth() == 0) {
-        totalDays = totalDays + now.getDate();
-      } else {
-        const curMonth = now.getMonth();
-        for (var count = 1; count <= curMonth; count++) {
-            totalDays = totalDays + days[count - 1];
-        }
-        totalDays = totalDays + now.getDate();
-      }
-      // 得到第幾周
-      let week = Math.round(totalDays / 7);
-      // console.log(week);
-      return week;
-    }
-
-    // // 日期插入-字串
-    // const insertStr = (source,first,second, newStr) => {
-    //   return source.slice(0, first) + newStr + source.slice(first,6) + newStr + source.slice(second)
-    // }
-
-    // // 國定假日
-    // const handleHoliday = ()=> {
-    //   // console.log(startTime.value);
-    //   holidayData.forEach(element => {
-    //     if (element['\u662f\u5426\u653e\u5047']==='2') {
-    //       events.push({
-    //         start: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 00:00`,
-    //         end: `${insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-')} 23:59`,
-    //         title: `
-    //         <h4 style="width:100%; height:20px;margin: 0px; color: #f00; ">${element["\u5099\u8a3b"]||'假日'}</h4>
-    //         `
-    //       })
-    //     }
-    //   });
-    // }
-
-
-    // // 平日排班
-    // const arrangeDate = (startDayTime,plusDays,endDayTime)=> { 
-    //   let peopleCounter = 0
-
-    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //判斷增加的天數有無超過結束日期
-    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
-
-    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
-    //     let addDayDate = formatTime(addDay.getDate())
-    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
-
-    //     let ans = holidayData.some((element)=> {
-    //       return (element["\u662f\u5426\u653e\u5047"] === '0' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
-    //     })
-   
-    //     if (ans) {
-    //       events.push({
-    //         start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //         end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //         title: `
-    //         <h3 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].name}</h3>
-    //         <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].phone}</h5>
-    //         <h5 style="margin: 4px">${arrangeEmployeeList.value[peopleCounter].email}</h5>
-    //         `,
-    //         name: `${arrangeEmployeeList.value[peopleCounter].name}`
-    //       })
-    //       peopleCounter+=1
-    //     }
-    //     if(peopleCounter>=arrangeEmployeeList.value.length) peopleCounter = 0
-    //   }
-    // }
-
-    // // 假日排班
-    // const arrangeWeekendDate = (startDayTime,plusDays,endDayTime)=> {
-    //   let peopleCounter = 0
-    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //判斷增加的天數有無超過結束日期
-    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
-
-    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
-    //     let addDayDate = formatTime(addDay.getDate())
-    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
-
-    //     let ans = holidayData.some((element)=> {
-    //       return (element["\u662f\u5426\u653e\u5047"] === '2' && insertStr(element['\u897f\u5143\u65e5\u671f'],4,6,'-') === formatAddDay)
-    //     })
-
-    //     if (ans) {
-    //       events.push({
-    //         start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //         end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //         title: `
-    //         <h3 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].name}</h3>
-    //         <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].phone}</h5>
-    //         <h5 style="margin: 4px">${arrangeWeekendEmployeeList.value[peopleCounter].email}</h5>
-    //         `,
-    //         name: `${arrangeWeekendEmployeeList.value[peopleCounter].name}`
-    //       })
-    //       peopleCounter+=1
-    //     }
-    //     if(peopleCounter>=arrangeWeekendEmployeeList.value.length) peopleCounter = 0
-    //   }
-    // }
-
-    // // 主管周末排班
-    // const arrangeDirectList = (startDayTime,plusDays,endDayTime)=> {
-    //   let peopleCounter = 0
-    //   for(let dayCounter = 0; dayCounter < plusDays+1; dayCounter+=1) {
-    //     if(startDayTime+1000*60*60*24*dayCounter >=endDayTime+1000*60*60*24) return //判斷增加的天數有無超過結束日期
-    //     let addDay = new Date(startDayTime+1000*60*60*24*dayCounter)
-    //     console.log();
-    //     let addDayMonth = formatTime(addDay.getMonth() + 1)
-    //     let addDayDate = formatTime(addDay.getDate())
-    //     let formatAddDay = `${addDay.getFullYear()}-${addDayMonth}-${addDayDate}`
-
-    //     // console.log(addDay.getDay());
-    //     if(addDay.getDay() === 6 && theWeek(addDay)%2!==0){
-    //       events.push(
-    //         {
-    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //           title: `
-    //           <h3 style="margin: 2px">本周主管: ${directorList.value[3].name}</h3>
-    //           `,
-    //           name: `${directorList.value[3].name}`
-    //         },
-    //         // {
-    //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //         //   title: `
-    //         //   <h3 style="margin: 4px">本周小組長: ${directorList.value[4].name}</h3>
-
-    //         //   `,
-    //         //   name: `${directorList.value[4].name}`
-    //         // }
-    //       )
-    //     } else if(addDay.getDay() === 0 && theWeek(addDay)%2!==0){
-    //       events.push(
-    //         {
-    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //           title: `
-    //           <h3 style="margin: 2px">本周主管: ${directorList.value[2].name}</h3>
-
-    //           `,
-    //           name: `${directorList.value[2].name}`
-    //         }
-    //       )
-    //     }
-
-
-    //     if(addDay.getDay() === 6 && theWeek(addDay)%2===0){
-    //       events.push(
-    //         {
-    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //           title: `
-    //           <h3 style="margin: 2px">本周主管: ${directorList.value[0].name}</h3>
- 
-    //           `,
-    //           name: `${directorList.value[0].name}`
-    //         }
-    //       )
-    //     } else if(addDay.getDay() === 0 && theWeek(addDay)%2===0){
-    //       events.push(
-    //         {
-    //           start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //           end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //           title: `
-    //           <h3 style="margin: 2px">本周主管: ${directorList.value[1].name}</h3>
-
-    //           `,
-    //           name: `${directorList.value[1].name}`
-    //         },
-    //         // {
-    //         //   start: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 09:00`,
-    //         //   end: `${addDay.getFullYear()}-${+addDayMonth}-${+addDayDate} 18:00`,
-    //         //   title: `
-    //         //   <h3 style="margin: 4px">本周小組長: ${directorList.value[5].name}</h3>
-   
-    //         //   `,
-    //         //   name: `${directorList.value[5].name}`
-    //         // }
-    //       )
-    //     }
-
-    //   } 
-    // }
-
-    // // 排班
-    // const arrange = ()=> {
-    //   events.splice(0,events.length)
-
-    //   let startDay = new Date(startTime.value)
-    //   let endDay = new Date(endTime.value)
-    //   let endDayTime = endDay.getTime()
-    //   let plusTimes = endDay.getTime()-startDay.getTime()
-    //   let plusDays = plusTimes/(1000*60*60*24)
-
-    //   if (arrangeEmployeeList.value.length === 0) {
-    //     arrangeEmployeeList.value = arrangeEmployeeList.value.concat(employeeList.value)
-    //     employeeList.value.splice(0,employeeList.value.length)
-    //   } 
-      
-    //   handleHoliday()
-    //   arrangeDate(startDay.getTime(),plusDays,endDayTime)
-    //   arrangeWeekendDate(startDay.getTime(),plusDays,endDayTime)
-    //   arrangeDirectList(startDay.getTime(),plusDays,endDayTime)
-    // }
 
 
     onMounted(()=> {
@@ -313,9 +109,9 @@ export default {
       handleWeekendEmployeeList,
       handleWeekendArrangeEmployeeList,
       formatTime,
-      startTime,
-      endTime,
-      createCsvFile
+      startTimeStatus,
+      endTimeStatus,
+      createCsvFile,
     }
   }
 }
@@ -333,10 +129,10 @@ export default {
     .date
       .startTime
         h3 開始日期
-        input(type='date' v-model='startTime')
+        input(type='date' v-model='startTimeStatus')
       .endTime
         h3 結束日期
-        input(type='date' v-model='endTime')
+        input(type='date' v-model='endTimeStatus')
     
     .list
       .weekdaysList
