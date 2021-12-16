@@ -8,12 +8,170 @@ import { computed, onMounted } from '@vue/runtime-core';
 import { useStore } from "vuex";
 import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
 
+import { initializeApp } from "@firebase/app";
+import firebaseConfig from "../data/firebaseConfig.json"
+
+import { 
+  getFirestore,
+  collection,
+  getDocs,
+  doc,addDoc,setDoc,
+  updateDoc,deleteDoc,
+  onSnapshot,
+  query,where
+} from 'firebase/firestore'
+
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signOut,signInWithEmailAndPassword,
+  onAuthStateChanged
+} from 'firebase/auth'
+
 export default {
   components: {
     VueCal
   },
 
   setup() {
+    const { formatTime,theWeek } = apiTime()
+
+    const store = useStore()
+    initializeApp(firebaseConfig)
+    const auth = getAuth()
+
+    //使用者狀態監聽
+    onAuthStateChanged(auth, (user)=> {
+      console.log('user status changed:',user);
+    })
+
+    const eventsData = computed(()=> {
+      return store.getters.eventsData
+    })
+
+    const todayDate = computed(()=> {
+      return store.getters.startTimeData
+    })
+
+    
+
+    const db = getFirestore()
+    const colRef = collection(db,'dateData')
+    const docRef = doc(db,'dateData',todayDate.value)
+
+    //增加firebase文件
+    const add = (e)=> {
+      e.preventDefault()
+      console.log(eventsData.value);
+      // addDoc(colRef,{
+      //   name: 'zz',
+      //   number: 3030
+      // }).then(()=> {
+      // })
+      console.log(todayDate.value);
+      setDoc(doc(db,'dateData',todayDate.value),{
+        eventsData: eventsData.value
+      })
+    }
+    
+    //更新firebase文件
+    const update = (e)=> {
+      e.preventDefault()
+      console.log(eventsData.value);
+
+      console.log(todayDate.value);
+      updateDoc(doc(db,'dateData','2022-holidays'),{
+        eventsData: eventsData.value
+      })
+    }
+
+    //刪除firebase資料
+    const del = (e)=> {
+      e.preventDefault()
+      deleteDoc(docRef)
+        .then(()=> {
+
+        })
+    }
+
+    //讀取firebase資料
+    const loadData = ()=> {
+
+      onSnapshot(colRef,(snapshot)=> {
+        snapshot.docs[0].data().eventsData.forEach((event)=> {
+          store.dispatch('commitEvents',event)
+        })
+      })
+
+      // getDocs(colRef)
+      //   .then((snapshot)=> {
+      //     // console.log(snapshot.docs[0]);
+      //     snapshot.docs[0].data().eventsData.forEach((event)=> {
+      //       store.dispatch('commitEvents',event)
+      //     })
+
+      //     // snapshot.docs.forEach((doc)=> {
+      //     //   doc.data().eventsData.forEach((event)=> {
+      //     //     store.dispatch('commitEvents',event)
+      //     //   })
+      //     // })
+      //   })
+      //   .catch(err => {
+      //     console.log(err.message);
+      //   })
+    }
+
+    //查詢firebase
+    const q = query(colRef,where('start','==','zz'))
+
+    const que = ()=> {
+      onSnapshot(q,(snapshot)=> {
+        console.log(snapshot.docs);
+        snapshot.docs.forEach((doc)=> {
+          doc.data().eventsData.forEach((event)=> {
+            console.log(event);
+          })
+        })
+      })
+    }
+
+    const signUp = ()=> {
+      let email = 'fixer2@cdc.gov.tw'
+      let password = '1qaz@WSX'
+
+      createUserWithEmailAndPassword(auth,email,password)
+        .then((cred)=> {
+          console.log('user created:',cred.user);
+        })
+        .catch((err)=> {
+          console.log(err.message);
+        })
+    }
+
+    const logout = ()=> {
+      signOut(auth)
+        .then(()=> {
+          // console.log('the user signed out');
+        })
+        .catch((err)=>{
+          console.log(err.message);
+        })
+    }
+
+    const login = ()=> {
+      let email = 'fixer3@cdc.gov.tw'
+      let password = 'cdc@1qaz@WSX'
+      signInWithEmailAndPassword(auth,email,password)
+        .then((cred)=> {
+          // console.log('user logged in:',cred.user);
+        })
+        .catch((err)=>{
+          console.log(err.message);
+        })
+    }
+
+
+
     const showAllDayEvents = ref(0)
     const shortEventsOnMonthView = ref(false)
 
@@ -38,10 +196,9 @@ export default {
       return store.getters.directorListData
     })
 
-    const store = useStore()
+    
 
-    const { formatTime,theWeek } = apiTime()
-
+    
     const startTimeStatus = computed({
       set(val) {
         store.dispatch('commitStartTime',val)
@@ -59,9 +216,6 @@ export default {
         return store.getters.endTimeData
       }
     })
-
-
-  
 
     const { 
       arrange,
@@ -85,8 +239,10 @@ export default {
     }
 
 
+
     onMounted(()=> {
-      handleHoliday()
+      // handleHoliday()
+      loadData()
     })
     
     return {
@@ -94,24 +250,17 @@ export default {
       showAllDayEvents,
       shortEventsOnMonthView,
       arrange,
- 
       handleHoliday,
       theWeek,
-      handleOpen,
-      isOpen,
-      employeeList,
-      employeeWeekendList,
-      directorList,
-      arrangeEmployeeList,
-      arrangeWeekendEmployeeList,
-      handleEmployeeList,
-      handleArrangeEmployeeList,
-      handleWeekendEmployeeList,
-      handleWeekendArrangeEmployeeList,
-      formatTime,
-      startTimeStatus,
-      endTimeStatus,
+      handleOpen,isOpen,
+      employeeList,employeeWeekendList,directorList,
+      arrangeEmployeeList,arrangeWeekendEmployeeList,
+      handleEmployeeList,handleArrangeEmployeeList,
+      handleWeekendEmployeeList,handleWeekendArrangeEmployeeList,
+      formatTime,startTimeStatus,endTimeStatus,
       createCsvFile,
+      add,del,update,que,
+      signUp,logout,login
     }
   }
 }
@@ -119,7 +268,13 @@ export default {
 
 <template lang="pug">
 .calendar
-
+  button.add(@click='add') add
+  button.del(@click='del') del
+  button.update(@click='update') update
+  button.query(@click='que') query
+  button.sign-up(@click='signUp') Sign Up
+  button.logout(@click='logout') Logout
+  button.login(@click='login') Login
   .switch
     button(@click='handleOpen' :class='["fas","fa-bars",{"fa-times": isOpen}]')
 
@@ -205,6 +360,24 @@ secondary_color = #e4f5ef
 .vuecal__title-bar
   background-color secondary_color
 
+.add,.del,.update,.query,.sign-up,.logout,.login
+  z-index 100
+  position absolute
+  right 0
+.del
+  top 20px
+.update
+  top 40px
+.query
+  right 40px
+.sign-up
+  right 100px
+.logout
+  top 20px
+  right 100px
+.login
+  top 40px
+  right 100px
 .switch
   position absolute
   top 0

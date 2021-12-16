@@ -21,17 +21,17 @@ const fn = ()=> {
     return store.getters.arrangeWeekendEmployeeListData
   })
 
-  // ³B²z¥­¤é±Æ¯Z¤H­û
+  // è™•ç†å¹³æ—¥æ’ç­äººå“¡
   const handleEmployeeList = (item)=> {
     
-      let had = store.getters.arrangeEmployeeListData.some((element)=> {            //ÀË¬d¶¶§Ç¦W³æ¤w¸g¦s¦b±Æ¯Z¦W³æ¤H­û?
+      let had = store.getters.arrangeEmployeeListData.some((element)=> {            //æª¢æŸ¥é †åºåå–®å·²ç¶“å­˜åœ¨æ’ç­åå–®äººå“¡?
         return element.name === item .name
       })
       if (!had) {
         store.dispatch('commitArrangeEmployeeList',item)
         // arrangeEmployeeList.value.push(item)
       }
-      employeeList.value.forEach((element,idx) => {                 //§R°£±Æ¯Z¦W³æ¤H­û
+      employeeList.value.forEach((element,idx) => {                 //åˆªé™¤æ’ç­åå–®äººå“¡
         if (item.name === element.name) {
           store.dispatch('commitEmployeelistSplice',{
             start: idx,
@@ -42,15 +42,15 @@ const fn = ()=> {
       });
     }
 
-    // ³B²z¥­¤é±Æ¯Z¶¶§Ç¦W³æ
+    // è™•ç†å¹³æ—¥æ’ç­é †åºåå–®
     const handleArrangeEmployeeList = (item)=> {
-      let had = employeeList.value.some((element)=> {                   //ÀË¬d±Æ¯Z¦W³æ¤w¸g¦s¦b¶¶§Ç¦W³æ¤H­û?
+      let had = employeeList.value.some((element)=> {                   //æª¢æŸ¥æ’ç­åå–®å·²ç¶“å­˜åœ¨é †åºåå–®äººå“¡?
         return element.name === item .name
       })
       if (!had) {
         store.dispatch('commitEmployeeList',item)
       }
-      arrangeEmployeeList.value.forEach((element,idx) => {          //§R°£¶¶§Ç¦W³æ¤H­û
+      arrangeEmployeeList.value.forEach((element,idx) => {          //åˆªé™¤é †åºåå–®äººå“¡
         if (item.name === element.name) {
           // arr.splice(idx,1)
           store.dispatch('commitArrangeEmployeeListSplice',{
@@ -62,16 +62,16 @@ const fn = ()=> {
     }
 
 
-    // ³B²z°²¤é±Æ¯Z¤H­û
+    // è™•ç†å‡æ—¥æ’ç­äººå“¡
     const handleWeekendEmployeeList = (item)=> {
-      let had = store.getters.arrangeWeekendEmployeeListData.some((element)=> {            //ÀË¬d¶¶§Ç¦W³æ¤w¸g¦s¦b±Æ¯Z¦W³æ¤H­û?
+      let had = store.getters.arrangeWeekendEmployeeListData.some((element)=> {            //æª¢æŸ¥é †åºåå–®å·²ç¶“å­˜åœ¨æ’ç­åå–®äººå“¡?
         return element.name === item .name
       })
       if (!had) {
         store.dispatch('commitArrangeWeekendEmployeeList',item)
         // arrangeWeekendEmployeeList.value.push(item)
       }
-      employeeWeekendList.value.forEach((element,idx,arr) => {                 //§R°£±Æ¯Z¦W³æ¤H­û
+      employeeWeekendList.value.forEach((element,idx,arr) => {                 //åˆªé™¤æ’ç­åå–®äººå“¡
         if (item.name === element.name) {
           // arr.splice(idx,1)
           store.dispatch('commitEmployeeWeekendListSplice',{
@@ -82,16 +82,16 @@ const fn = ()=> {
       });
     }
 
-    // ³B²z°²¤é±Æ¯Z¶¶§Ç¦W³æ
+    // è™•ç†å‡æ—¥æ’ç­é †åºåå–®
     const handleWeekendArrangeEmployeeList = (item)=> {
-      let had = employeeWeekendList.value.some((element)=> {                   //ÀË¬d±Æ¯Z¦W³æ¤w¸g¦s¦b¶¶§Ç¦W³æ¤H­û?
+      let had = employeeWeekendList.value.some((element)=> {                   //æª¢æŸ¥æ’ç­åå–®å·²ç¶“å­˜åœ¨é †åºåå–®äººå“¡?
         return element.name === item .name
       })
       if (!had) {
         // employeeWeekendList.value.push(item)
         store.dispatch('commitEmployeeWeekendList',item)
       }
-      arrangeWeekendEmployeeList.value.forEach((element,idx,arr) => {          //§R°£¶¶§Ç¦W³æ¤H­û
+      arrangeWeekendEmployeeList.value.forEach((element,idx,arr) => {          //åˆªé™¤é †åºåå–®äººå“¡
         if (item.name === element.name) {
           // arr.splice(idx,1)
           store.dispatch('commitArrangeWeekendEmployeeListSplice', {

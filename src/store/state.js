@@ -3,8 +3,7 @@ import { apiTime } from '../api'
 import employeeData from '../data/employeeData.json'
 import directorData from '../data/directorData.json'
 
-const { formatTime } = apiTime()
-const today = new Date()
+const { today,formatTime } = apiTime()
 let formatMonth = formatTime(today.getMonth() + 1)
 let formatDate = formatTime(today.getDate())
 const startTime = `${today.getFullYear()}-${formatMonth}-${formatDate}`

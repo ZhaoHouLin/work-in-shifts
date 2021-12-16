@@ -5,6 +5,7 @@ dist-ssr
 
 directorData.json
 employeeData.json
+firebaseConfig.json
 
 # fakeDirectorData.json
 # fakeEmployeeData.json

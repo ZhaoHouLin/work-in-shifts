@@ -1,13 +1,14 @@
 import { ref } from '@vue/reactivity';
 
 const fn = ()=> {
-  const formatTime = (val) => {                           //®æ¦¡¤Æ®É¶¡(00:00)
+  const formatTime = (val) => {                           //æ ¼å¼åŒ–æ™‚é–“(00:00)
     let dTimes = '00' + val
     return `${dTimes.substring(dTimes.length - 2)}`
   }
 
+  const today = new Date()
 
-  // §PÂ_³æÂù©Pµ{¦¡
+  // åˆ¤æ–·å–®é›™å‘¨ç¨‹å¼
   const theWeek = (now) => {
     let totalDays = 0;
     // let now = new Date();
@@ -27,7 +28,7 @@ const fn = ()=> {
     days[10] = 30;
     days[11] = 31;
 
-    // §PÂ_¬O§_¬°¶|¦~,°w¹ï2¤ëªº¤Ñ¼Æ¶i¦æ­pºâ
+    // åˆ¤æ–·æ˜¯å¦ç‚ºé–å¹´,é‡å°2æœˆçš„å¤©æ•¸é€²è¡Œè¨ˆç®—
     if (Math.round(now.getYear() / 4) == now.getYear() / 4) {
       days[1] = 29
     } else {
@@ -42,13 +43,14 @@ const fn = ()=> {
       }
       totalDays = totalDays + now.getDate();
     }
-    // ±o¨ì²Ä´X©P
+    // å¾—åˆ°ç¬¬å¹¾å‘¨
     let week = Math.round(totalDays / 7);
     // console.log(week);
     return week;
   }
 
   return {
+    today,
     formatTime,
     theWeek
   }
