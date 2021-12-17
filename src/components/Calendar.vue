@@ -1,10 +1,9 @@
 <script>
 
-import { ref } from '@vue/reactivity';
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
-import { computed, onMounted } from '@vue/runtime-core';
+import { ref,computed, onMounted } from '@vue/runtime-core';
 import { useStore } from "vuex";
 import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
 
@@ -25,7 +24,8 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   signOut,signInWithEmailAndPassword,
-  onAuthStateChanged
+  onAuthStateChanged,
+  signInWithPopup, GoogleAuthProvider
 } from 'firebase/auth'
 
 export default {
@@ -34,42 +34,56 @@ export default {
   },
 
   setup() {
+    // ↓===↓===↓===↓===↓===↓===↓ 自訂api引入 ↓===↓===↓===↓===↓===↓===↓ //
     const { formatTime,theWeek } = apiTime()
+
+    const { 
+      arrange,
+      handleHoliday 
+    } = apiArrangeDateList()
+
+    const { 
+      handleEmployeeList,
+      handleArrangeEmployeeList,
+      handleWeekendEmployeeList,
+      handleWeekendArrangeEmployeeList
+    } = apiHandleList()
+
+    const {events,JSONToExcelConvertor,createCsvFile} = apiConvertor()
+    // ↑===↑===↑===↑===↑===↑===↑ 自訂api引入 ↑===↑===↑===↑===↑===↑===↑ //
 
     const store = useStore()
     initializeApp(firebaseConfig)
     const auth = getAuth()
+    const provider = new GoogleAuthProvider()
+
+    
+
+    const eventsData = computed(()=> {
+      return store.getters.eventsData
+    })
+    const todayDate = computed(()=> {
+      return store.getters.startTimeData
+    })
+    const googleUserInfo = computed(()=> {
+      return store.getters.googleUserInfoData
+    })
 
     //使用者狀態監聽
     onAuthStateChanged(auth, (user)=> {
       console.log('user status changed:',user);
     })
-
-    const eventsData = computed(()=> {
-      return store.getters.eventsData
-    })
-
-    const todayDate = computed(()=> {
-      return store.getters.startTimeData
-    })
-
     
 
     const db = getFirestore()
-    const colRef = collection(db,'dateData')
-    const docRef = doc(db,'dateData',todayDate.value)
 
-    //增加firebase文件
+    //定義firebase資料庫集合位置
+    const colRef = collection(db,'holidaysData')
+
+    //建立國定假日firebase文件才使用
     const add = (e)=> {
       e.preventDefault()
-      console.log(eventsData.value);
-      // addDoc(colRef,{
-      //   name: 'zz',
-      //   number: 3030
-      // }).then(()=> {
-      // })
-      console.log(todayDate.value);
-      setDoc(doc(db,'dateData',todayDate.value),{
+      setDoc(doc(db,'holidaysData','2022-holidays'),{
         eventsData: eventsData.value
       })
     }
@@ -77,68 +91,84 @@ export default {
     //更新firebase文件
     const update = (e)=> {
       e.preventDefault()
-      console.log(eventsData.value);
-
-      console.log(todayDate.value);
-      updateDoc(doc(db,'dateData','2022-holidays'),{
+      updateDoc(doc(db,'holidaysData',googleUserInfo.value.user.uid),{
         eventsData: eventsData.value
       })
     }
 
-    //刪除firebase資料
-    const del = (e)=> {
+    //儲存資料到firebase
+    const save = (e)=> {
       e.preventDefault()
-      deleteDoc(docRef)
-        .then(()=> {
-
+      getDocs(colRef).then((snapshot)=> {
+        snapshot.docs.forEach((userData)=> {
+          if(userData.id===googleUserInfo.value.user.uid) {
+            updateDoc(doc(db,'userDateData',googleUserInfo.value.user.uid),{
+              eventsData: eventsData.value
+            })
+          } else {
+            setDoc(doc(db,'userDateData',googleUserInfo.value.user.uid),{
+              eventsData: eventsData.value
+            })
+          }
         })
-    }
 
-    //讀取firebase資料
-    const loadData = ()=> {
-
-      onSnapshot(colRef,(snapshot)=> {
-        snapshot.docs[0].data().eventsData.forEach((event)=> {
-          store.dispatch('commitEvents',event)
-        })
       })
 
-      // getDocs(colRef)
-      //   .then((snapshot)=> {
-      //     // console.log(snapshot.docs[0]);
-      //     snapshot.docs[0].data().eventsData.forEach((event)=> {
-      //       store.dispatch('commitEvents',event)
-      //     })
+    }
 
-      //     // snapshot.docs.forEach((doc)=> {
-      //     //   doc.data().eventsData.forEach((event)=> {
-      //     //     store.dispatch('commitEvents',event)
-      //     //   })
-      //     // })
-      //   })
-      //   .catch(err => {
-      //     console.log(err.message);
-      //   })
+    //刪除firebase資料
+    const del = (e)=> {
+      const docRef = doc(db,'holidaysData',todayDate.value)
+      e.preventDefault()
+      deleteDoc(docRef)
+        .then(()=> {})
+    }
+
+    //讀取firebase的國定假日資料
+    const loadHolidays = ()=> {
+      getDocs(colRef).then((snapshot)=> {
+        snapshot.docs.forEach((data)=> {
+          data.data().eventsData.forEach((event)=> {
+            store.dispatch('commitEvents',event)
+          })
+        })
+      })
+    }
+
+    //讀取使用者排班儲存的firebase資料
+    const loadData = ()=> {
+      store.dispatch('commitDeleteEvents')
+      getDocs(collection(db,'userDateData'))
+        .then((snapshot)=> {
+          snapshot.docs.forEach((userData)=> {
+            if(userData.id===googleUserInfo.value.user.uid) {
+              userData.data().eventsData.forEach( (event)=> {
+                store.dispatch('commitEvents',event)
+              })
+            }
+          })
+        })
+        .catch(err => {
+          console.log(err.message);
+        })
     }
 
     //查詢firebase
     const q = query(colRef,where('start','==','zz'))
 
     const que = ()=> {
-      onSnapshot(q,(snapshot)=> {
-        console.log(snapshot.docs);
-        snapshot.docs.forEach((doc)=> {
-          doc.data().eventsData.forEach((event)=> {
-            console.log(event);
-          })
-        })
-      })
+      // onSnapshot(q,(snapshot)=> {
+      //   console.log(snapshot.docs);
+      //   snapshot.docs.forEach((doc)=> {
+      //     doc.data().eventsData.forEach((event)=> {
+      //       console.log(event);
+      //     })
+      //   })
+      // })
     }
 
+    //以email註冊才使用
     const signUp = ()=> {
-      let email = 'fixer2@cdc.gov.tw'
-      let password = '1qaz@WSX'
-
       createUserWithEmailAndPassword(auth,email,password)
         .then((cred)=> {
           console.log('user created:',cred.user);
@@ -148,33 +178,60 @@ export default {
         })
     }
 
+    //登出
     const logout = ()=> {
+      store.dispatch('commitDeleteEvents')
+      store.dispatch('commitDeleteGoogleUserInfo')
+      loadHolidays()
       signOut(auth)
         .then(()=> {
-          // console.log('the user signed out');
+          console.log('the user signed out');
         })
         .catch((err)=>{
           console.log(err.message);
         })
     }
 
-    const login = ()=> {
-      let email = 'fixer3@cdc.gov.tw'
-      let password = 'cdc@1qaz@WSX'
-      signInWithEmailAndPassword(auth,email,password)
-        .then((cred)=> {
-          // console.log('user logged in:',cred.user);
-        })
-        .catch((err)=>{
-          console.log(err.message);
-        })
+    //登入
+    const login = async ()=> {
+      
+      //以郵箱帳密登入
+      // signInWithEmailAndPassword(auth,email,password)
+      //   .then((cred)=> {
+      //     // console.log('user logged in:',cred.user);
+      //   })
+      //   .catch((err)=>{
+      //     console.log(err.message);
+      //   })
+      await signInWithPopup(auth, provider)
+        .then((result) => {
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          const credential = GoogleAuthProvider.credentialFromResult(result);
+          store.dispatch('commitGoogleUserInfo',result)
+          // console.log(result);
+          
+          const token = credential.accessToken;
+          // The signed-in user info.
+          const user = result.user;
+          // ...
+        }).catch((error) => {
+          // Handle Errors here.
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          // The email of the user's account used.
+          const email = error.email;
+          // The AuthCredential type that was used.
+          const credential = GoogleAuthProvider.credentialFromError(error);
+          // ...
+        });
+      await loadData()
     }
 
 
-
+    //↓======Vue-cal用======↓//
     const showAllDayEvents = ref(0)
     const shortEventsOnMonthView = ref(false)
-
+    //↑======Vue-cal用======↑//
 
     const employeeList = computed(()=> {
       return store.getters.employeeListData
@@ -197,7 +254,15 @@ export default {
     })
 
     
-
+    // const editEvents = computed({
+    //   set(val) {
+    //     console.log(val);
+    //     store.dispatch('commitEvents',eventsData.value)
+    //   },
+    //   get() {
+    //     return store.getters.eventsData
+    //   }
+    // })
     
     const startTimeStatus = computed({
       set(val) {
@@ -217,33 +282,19 @@ export default {
       }
     })
 
-    const { 
-      arrange,
-      handleHoliday 
-    } = apiArrangeDateList()
-
-    const { 
-      handleEmployeeList,
-      handleArrangeEmployeeList,
-      handleWeekendEmployeeList,
-      handleWeekendArrangeEmployeeList
-    } = apiHandleList()
-
-    const {events,JSONToExcelConvertor,createCsvFile} = apiConvertor()
+    
 
     const isOpen = ref(false)
-
 
     const handleOpen = ()=> {
       isOpen.value = !isOpen.value
     }
 
 
-
     onMounted(()=> {
-      // handleHoliday()
-      loadData()
+      loadHolidays()
     })
+
     
     return {
       events,
@@ -260,7 +311,10 @@ export default {
       formatTime,startTimeStatus,endTimeStatus,
       createCsvFile,
       add,del,update,que,
-      signUp,logout,login
+      signUp,logout,login,
+      save,
+      // editEvents
+      // loadData
     }
   }
 }
@@ -268,10 +322,10 @@ export default {
 
 <template lang="pug">
 .calendar
-  button.add(@click='add') add
-  button.del(@click='del') del
-  button.update(@click='update') update
-  button.query(@click='que') query
+  //- button.add(@click='add') add
+  //- button.del(@click='del') del
+  //- button.query(@click='loadData') loadData
+  button.save(@click='save') save
   button.sign-up(@click='signUp') Sign Up
   button.logout(@click='logout') Logout
   button.login(@click='login') Login
@@ -319,7 +373,8 @@ export default {
 
     .input
       button(@click='arrange') 排班
-      button(@click='createCsvFile') .csv班表下載
+      //- button(@click='createCsvFile') .csv班表下載
+      button(@click='save') 儲存班表
     .designInfo
       h1 資訊室排班囉
       h5 created by ZhaoHouLin
@@ -360,13 +415,13 @@ secondary_color = #e4f5ef
 .vuecal__title-bar
   background-color secondary_color
 
-.add,.del,.update,.query,.sign-up,.logout,.login
+.add,.del,.save,.query,.sign-up,.logout,.login
   z-index 100
   position absolute
   right 0
 .del
   top 20px
-.update
+.save
   top 40px
 .query
   right 40px

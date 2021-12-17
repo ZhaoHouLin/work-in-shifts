@@ -1,4 +1,15 @@
 export default {
+
+  commitGoogleUserInfo({commit},payload) {
+    commit('stateGoogleUserInfo',payload)
+  },
+  commitDeleteGoogleUserInfo({ commit }) {
+    commit('stateDeleteGoogleUserInfo')
+  },
+  commitDeleteEvents({ commit }) {
+    commit('stateDeleteEvents')
+  },
+
   //list
   commitEmployeeList({commit},payload) {
     commit('stateEmployeeList',payload)

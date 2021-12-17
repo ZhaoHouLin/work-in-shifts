@@ -1,4 +1,15 @@
 export default {
+
+  stateGoogleUserInfo(state,payload) {
+    state.googleUserInfo = payload
+  },
+  stateDeleteGoogleUserInfo(state) {
+    state.googleUserInfo = null
+  },
+  stateDeleteEvents(state) {
+    state.events = []
+  },
+
   //list
   stateEmployeeList(state,payload) {
     state.employeeList.push(payload)
@@ -38,7 +49,8 @@ export default {
     state.arrangeWeekendEmployeeList.push(...payload)
   },
 
-  stateEvents(state, payload) {             
+  stateEvents(state, payload) {   
+    // console.log(payload);          
     state.events.push(payload)
   },
   
