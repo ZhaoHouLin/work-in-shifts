@@ -58,6 +58,7 @@ export default {
     const provider = new GoogleAuthProvider()
 
     
+    
 
     const eventsData = computed(()=> {
       return store.getters.eventsData
@@ -69,13 +70,19 @@ export default {
       return store.getters.googleUserInfoData
     })
 
-    //使用者狀態監聽
-    onAuthStateChanged(auth, (user)=> {
-      console.log('user status changed:',user);
-    })
-    
+    const emailVerified = ref(false)
 
     const db = getFirestore()
+
+    //使用者狀態監聽
+    onAuthStateChanged(auth, (user)=> {
+      if(auth.currentUser === null) {
+        emailVerified.value = false
+      } else {
+        emailVerified.value = auth.currentUser.emailVerified
+      }
+      // console.log('user status changed:',user);
+    })
 
     //定義firebase資料庫集合位置
     const colRef = collection(db,'holidaysData')
@@ -111,9 +118,10 @@ export default {
             })
           }
         })
-
+      }).catch(err => {
+        console.log(err.message);
       })
-
+      console.log('ok');
     }
 
     //刪除firebase資料
@@ -126,6 +134,8 @@ export default {
 
     //讀取firebase的國定假日資料
     const loadHolidays = ()=> {
+      store.dispatch('commitDeleteEvents')
+      store.dispatch('commitDeleteGoogleUserInfo')
       getDocs(colRef).then((snapshot)=> {
         snapshot.docs.forEach((data)=> {
           data.data().eventsData.forEach((event)=> {
@@ -180,8 +190,6 @@ export default {
 
     //登出
     const logout = ()=> {
-      store.dispatch('commitDeleteEvents')
-      store.dispatch('commitDeleteGoogleUserInfo')
       loadHolidays()
       signOut(auth)
         .then(()=> {
@@ -190,6 +198,7 @@ export default {
         .catch((err)=>{
           console.log(err.message);
         })
+      
     }
 
     //登入
@@ -292,9 +301,9 @@ export default {
 
 
     onMounted(()=> {
-      loadHolidays()
+      logout()
+      // loadHolidays()
     })
-
     
     return {
       events,
@@ -315,6 +324,8 @@ export default {
       save,
       // editEvents
       // loadData
+      emailVerified,
+      googleUserInfo
     }
   }
 }
@@ -325,10 +336,19 @@ export default {
   //- button.add(@click='add') add
   //- button.del(@click='del') del
   //- button.query(@click='loadData') loadData
-  button.save(@click='save') save
-  button.sign-up(@click='signUp') Sign Up
-  button.logout(@click='logout') Logout
-  button.login(@click='login') Login
+  //- button.save(@click='save') save
+  //- button.sign-up(@click='signUp') Sign Up
+
+  .login(@click='login' v-if='!emailVerified')
+    //- .fab.fa-google
+    h3 Google登入
+    .fas.fa-sign-in-alt
+  .logout( v-if='emailVerified')
+    //- .fab.fa-google
+    img(:src='googleUserInfo.user.photoURL', alt="alt")
+    h4 {{googleUserInfo.user.displayName}}
+    .fas.fa-sign-out-alt(@click='logout')
+    //- h4(@click='logout') 登出
   .switch
     button(@click='handleOpen' :class='["fas","fa-bars",{"fa-times": isOpen}]')
 
@@ -402,6 +422,7 @@ export default {
 primary_color = #42b983
 secondary_color = #e4f5ef
 
+
 .calendar 
   width 100%
   height 100vh
@@ -427,12 +448,36 @@ secondary_color = #e4f5ef
   right 40px
 .sign-up
   right 100px
+// .logout
+//   top 20px
+//   right 200px
+.login,.logout
+  display flex
+  justify-content space-around
+  align-items center
+  width auto
+  height 46px
+  padding 0 1rem
+  color white
+  cursor pointer
+  // .fa-google
+  //   font-size 1.5rem
+  //   margin-right 1rem
+  h3,h4
+    color white
+    background-color transparent
+    border none
+    margin 0px 12px
+  .fas
+    font-size 1.4rem
 .logout
-  top 20px
-  right 100px
-.login
-  top 40px
-  right 100px
+  // border 1px solid #000
+  justify-content space-between
+  img
+    width 32px
+    border-radius 100%
+  .fas
+    font-size 1.6rem
 .switch
   position absolute
   top 0
