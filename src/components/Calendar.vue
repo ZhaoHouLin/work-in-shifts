@@ -55,7 +55,7 @@ export default {
     const store = useStore()
     initializeApp(firebaseConfig)
     const auth = getAuth()
-    const provider = new GoogleAuthProvider()
+    
 
     
     
@@ -71,6 +71,8 @@ export default {
     })
 
     const emailVerified = ref(false)
+
+    const message = ref('')
 
     const db = getFirestore()
 
@@ -117,11 +119,14 @@ export default {
               eventsData: eventsData.value
             })
           }
+          message.value = '儲存成功'
         })
       }).catch(err => {
         console.log(err.message);
+        message.value = err.message
       })
-      console.log('ok');
+      // console.log('ok');
+      
     }
 
     //刪除firebase資料
@@ -190,6 +195,7 @@ export default {
 
     //登出
     const logout = ()=> {
+      message.value = ''
       loadHolidays()
       signOut(auth)
         .then(()=> {
@@ -203,7 +209,7 @@ export default {
 
     //登入
     const login = async ()=> {
-      
+      const provider = new GoogleAuthProvider()
       //以郵箱帳密登入
       // signInWithEmailAndPassword(auth,email,password)
       //   .then((cred)=> {
@@ -212,14 +218,15 @@ export default {
       //   .catch((err)=>{
       //     console.log(err.message);
       //   })
+    
       await signInWithPopup(auth, provider)
         .then((result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
           const credential = GoogleAuthProvider.credentialFromResult(result);
           store.dispatch('commitGoogleUserInfo',result)
-          // console.log(result);
-          
+
           const token = credential.accessToken;
+
           // The signed-in user info.
           const user = result.user;
           // ...
@@ -302,7 +309,6 @@ export default {
 
     onMounted(()=> {
       logout()
-      // loadHolidays()
     })
     
     return {
@@ -325,7 +331,8 @@ export default {
       // editEvents
       // loadData
       emailVerified,
-      googleUserInfo
+      googleUserInfo,
+      message
     }
   }
 }
@@ -355,13 +362,18 @@ export default {
   //- .menu(:class='[{"open": isOpen}]')
   .menu(:class='["animate__animated",{"animate__fadeInLeft": isOpen},{"open": isOpen}]')
     
-    .date
-      .startTime
-        h3 開始日期
-        input(type='date' v-model='startTimeStatus')
-      .endTime
-        h3 結束日期
-        input(type='date' v-model='endTimeStatus')
+    .row
+      .designInfo
+        h1 資訊室排班囉
+        h5 created by ZhaoHouLin
+
+      .date
+        .startTime
+          h3 開始日期
+          input(type='date' v-model='startTimeStatus')
+        .endTime
+          h3 結束日期
+          input(type='date' v-model='endTimeStatus')
     
     .list
       .weekdaysList
@@ -392,12 +404,12 @@ export default {
             button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)')
 
     .input
-      button(@click='arrange') 排班
-      //- button(@click='createCsvFile') .csv班表下載
-      button(@click='save') 儲存班表
-    .designInfo
-      h1 資訊室排班囉
-      h5 created by ZhaoHouLin
+      h4 {{message}}
+      .inputBtn
+        button(@click='arrange') 排班
+        //- button(@click='createCsvFile') .csv班表下載
+        button(@click='save') 儲存班表
+    
       
   VueCal.calendar(
     :events='events' active-view="month" 
@@ -448,9 +460,7 @@ secondary_color = #e4f5ef
   right 40px
 .sign-up
   right 100px
-// .logout
-//   top 20px
-//   right 200px
+
 .login,.logout
   display flex
   justify-content space-around
@@ -460,9 +470,7 @@ secondary_color = #e4f5ef
   padding 0 1rem
   color white
   cursor pointer
-  // .fa-google
-  //   font-size 1.5rem
-  //   margin-right 1rem
+
   h3,h4
     color white
     background-color transparent
@@ -471,7 +479,6 @@ secondary_color = #e4f5ef
   .fas
     font-size 1.4rem
 .logout
-  // border 1px solid #000
   justify-content space-between
   img
     width 32px
@@ -504,7 +511,7 @@ secondary_color = #e4f5ef
   background-color rgba(66,185,131,0.9)
   z-index 2
   display flex
-  justify-content flex-start
+  justify-content center
   align-items center
   flex-direction column
   padding 1rem 0
@@ -514,43 +521,58 @@ secondary_color = #e4f5ef
   transition 0.5s
   &.open
     left 0
-  .designInfo
-    color #fff
-    position absolute
-    padding 16px
-    bottom 0
+  .row
     width 100%
-    z-index -1
-  .date
-    color #fff
-    width 100%
+    height 10vh
     display flex
-    justify-content space-around
-    flex-direction column
-    align-items center
-    margin-bottom 1rem
+    justify-content center
+
+    .designInfo
+      color #fff
+      padding 16px 0
+      width 100%
+      z-index -1
+    .date
+
+      color #fff
+      width 100%
+      display flex
+      justify-content space-around
+      flex-direction column
+      align-items center
+
   .input
     width 100%
-    button
-      font-size 1rem
-      font-weight 700
-      border none
-      background-color secondary_color
-      color #222
-      margin 0 8px
-      padding 8px 16px
-      border-radius 4px
-      cursor pointer
+    height 10vh
+    bottom 0
+    display flex
+    justify-content center
+    position relative
+    h4
+      color white
+    .inputBtn
+      position absolute
+      bottom 0
+      button
+        font-size 1rem
+        font-weight 700
+        border none
+        background-color secondary_color
+        color #222
+        margin 0 8px
+        padding 8px 16px
+        border-radius 4px
+        cursor pointer
 
 
   .list
     color #fff
     display flex
-    justify-content space-around
-    align-items flex-start
+    justify-content center
+    align-items center
     width 100%
-    padding 1rem 0
-    margin-bottom 1rem
+    margin-bottom 3rem
+    margin-top 1rem
     position relative
     i
       position absolute
@@ -559,9 +581,9 @@ secondary_color = #e4f5ef
 
     .weekdaysList,.weekendList
       width 50%
+      height 60vh
       display flex
       justify-content center
-      // border 1px solid #222
       .arrangeEmployeeList
         margin-left 2rem
       .employeeList,.arrangeEmployeeList
