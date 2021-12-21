@@ -1,6 +1,6 @@
 
 import { apiTime } from '../api'
-import employeeData from '../data/employeeData.json'
+// import employeeData from '../data/employeeData.json'
 import directorData from '../data/directorData.json'
 
 const { today,formatTime } = apiTime()
@@ -9,8 +9,8 @@ let formatDate = formatTime(today.getDate())
 const startTime = `${today.getFullYear()}-${formatMonth}-${formatDate}`
 
 export default {
-  employeeList: employeeData,
-  employeeWeekendList: employeeData.concat(),  //深拷貝
+  employeeList: [],
+  employeeWeekendList: [],  //深拷貝
   arrangeEmployeeList: [],
   arrangeWeekendEmployeeList: [],
   directorList: directorData,

@@ -1,4 +1,10 @@
 export default {
+  stateResetList(state) {
+    state.employeeList= []
+    state.employeeWeekendList = []
+    state.arrangeEmployeeList = []
+    state.arrangeWeekendEmployeeList = []
+  },
 
   stateGoogleUserInfo(state,payload) {
     state.googleUserInfo = payload

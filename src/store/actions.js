@@ -1,6 +1,9 @@
 export default {
+  commitResetList({ commit }) {
+    commit('stateResetList')
+  },
 
-  commitGoogleUserInfo({commit},payload) {
+  commitGoogleUserInfo({ commit },payload) {
     commit('stateGoogleUserInfo',payload)
   },
   commitDeleteGoogleUserInfo({ commit }) {
@@ -11,30 +14,30 @@ export default {
   },
 
   //list
-  commitEmployeeList({commit},payload) {
+  commitEmployeeList({ commit },payload) {
     commit('stateEmployeeList',payload)
   },
-  commitEmployeeWeekendList({commit},payload) {
+  commitEmployeeWeekendList({ commit },payload) {
     commit('stateEmployeeWeekendList',payload)
   },
-  commitArrangeEmployeeList({commit},payload) {
+  commitArrangeEmployeeList({ commit },payload) {
     commit('stateArrangeEmployeeList',payload)
   },
-  commitArrangeWeekendEmployeeList({commit},payload) {
+  commitArrangeWeekendEmployeeList({ commit },payload) {
     commit('stateArrangeWeekendEmployeeList',payload)
   },
 
   //splice
-  commitEmployeelistSplice({commit},payload) {
+  commitEmployeelistSplice({ commit },payload) {
     commit('stateEmployeelistSplice',payload)
   },
-  commitEmployeeWeekendListSplice({commit},payload) {
+  commitEmployeeWeekendListSplice({ commit },payload) {
     commit('stateEmployeeWeekendListSplice',payload)
   },
-  commitArrangeEmployeeListSplice({commit},payload) {
+  commitArrangeEmployeeListSplice({ commit },payload) {
     commit('stateArrangeEmployeeListSplice',payload)
   },
-  commitArrangeWeekendEmployeeListSplice({commit},payload) {
+  commitArrangeWeekendEmployeeListSplice({ commit },payload) {
     commit('stateArrangeWeekendEmployeeListSplice',payload)
   },
   commitEventsSplice({ commit }, payload) {
@@ -42,20 +45,20 @@ export default {
   },
 
   //concat
-  commitListConcat({commit},payload) {
+  commitListConcat({ commit },payload) {
     commit('stateListConcat',payload)
   },
   commitWeekendListConcat({ commit }, payload) {
     commit('stateWeekendListConcat', payload)
   },
 
-  commitEvents({commit},payload) {       
+  commitEvents({ commit },payload) {       
     commit('stateEvents',payload)
   },
-  commitStartTime({commit},payload) {       
+  commitStartTime({ commit },payload) {       
     commit('stateStartTime',payload)
   },
-  commitEndTime({commit},payload) {       
+  commitEndTime({ commit },payload) {       
     commit('stateEndTime',payload)
   },
 }

@@ -10,6 +10,8 @@ import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
 import { initializeApp } from "@firebase/app";
 import firebaseConfig from "../data/firebaseConfig.json"
 
+import employeeData from '../data/employeeData.json'
+
 import { 
   getFirestore,
   collection,
@@ -57,8 +59,25 @@ export default {
     const auth = getAuth()
     
 
-    
-    
+    const employeeList = computed(()=> {
+      return store.getters.employeeListData
+    })
+
+    const arrangeEmployeeList = computed(()=> {
+      return store.getters.arrangeEmployeeListData
+    })
+
+    const employeeWeekendList = computed(()=> {
+      return store.getters.employeeWeekendListData
+    })
+
+    const arrangeWeekendEmployeeList = computed(()=> {
+      return store.getters.arrangeWeekendEmployeeListData
+    })
+
+    const directorList = computed(()=> {
+      return store.getters.directorListData
+    })  
 
     const eventsData = computed(()=> {
       return store.getters.eventsData
@@ -92,9 +111,25 @@ export default {
     //建立國定假日firebase文件才使用
     const add = (e)=> {
       e.preventDefault()
-      setDoc(doc(db,'holidaysData','2022-holidays'),{
-        eventsData: eventsData.value
+      // setDoc(doc(db,'holidaysData','2022-holidays'),{
+      //   eventsData: eventsData.value
+      // })
+
+      setDoc(doc(db,'list','employeeList'),{
+        employeeList: employeeData
       })
+
+      // setDoc(doc(db,'list','employeeWeekendList'),{
+      //   employeeWeekendList: employeeData
+      // })
+
+      // setDoc(doc(db,'list','arrangeEmployeeList'),{
+      //   arrangeEmployeeList: []
+      // })
+
+      // setDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
+      //   arrangeWeekendEmployeeList: []
+      // })
     }
     
     //更新firebase文件
@@ -126,7 +161,19 @@ export default {
         message.value = err.message
       })
       // console.log('ok');
-      
+      updateDoc(doc(db,'list','employeeList'),{
+        employeeList: employeeList.value
+      })
+      updateDoc(doc(db,'list','employeeWeekendList'),{
+        employeeWeekendList: employeeWeekendList.value
+      })
+      updateDoc(doc(db,'list','arrangeEmployeeList'),{
+        arrangeEmployeeList: arrangeEmployeeList.value
+      })
+      updateDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
+        arrangeWeekendEmployeeList: arrangeWeekendEmployeeList.value
+      })
+
     }
 
     //刪除firebase資料
@@ -166,6 +213,65 @@ export default {
         .catch(err => {
           console.log(err.message);
         })
+
+      getDocs(collection(db,'list'))
+        .then((snapshot)=> {
+          snapshot.docs.forEach((userData)=> {
+            switch(userData.id) {
+              case 'employeeList' :
+                userData.data().employeeList.forEach((item)=> {
+                  store.dispatch('commitEmployeeList',item)
+                })
+                break
+              case 'employeeWeekendList' :
+                userData.data().employeeWeekendList.forEach((item)=> {
+                  store.dispatch('commitEmployeeWeekendList',item)
+                })
+                break
+              case 'arrangeEmployeeList' :
+                userData.data().arrangeEmployeeList.forEach((item)=> {
+                  store.dispatch('commitArrangeEmployeeList',item)
+                })
+                break
+              case 'arrangeWeekendEmployeeList' :
+                userData.data().arrangeWeekendEmployeeList.forEach((item)=> {
+                  store.dispatch('commitArrangeWeekendEmployeeList',item)
+                })
+                break
+            }
+          })
+        })
+        .catch(err => {
+          console.log(err.message);
+        })
+
+      // onSnapshot(collection(db,'list'),(snapshot)=> {
+      //   snapshot.docs.forEach((userData)=> {
+      //     switch(userData.id) {
+      //       case 'employeeList' :
+      //         userData.data().employeeList.forEach((item)=> {
+      //           store.dispatch('commitEmployeeList',item)
+      //         })
+      //         break
+      //       case 'employeeWeekendList' :
+      //         userData.data().employeeWeekendList.forEach((item)=> {
+      //           store.dispatch('commitEmployeeWeekendList',item)
+      //         })
+      //         break
+      //       case 'arrangeEmployeeList' :
+      //         userData.data().arrangeEmployeeList.forEach((item)=> {
+      //           store.dispatch('commitArrangeEmployeeList',item)
+      //         })
+      //         break
+      //       case 'arrangeWeekendEmployeeList' :
+      //         userData.data().arrangeWeekendEmployeeList.forEach((item)=> {
+      //           store.dispatch('commitArrangeWeekendEmployeeList',item)
+      //         })
+      //         break
+      //     }
+      //   })
+      // })
+
     }
 
     //查詢firebase
@@ -195,6 +301,7 @@ export default {
 
     //登出
     const logout = ()=> {
+      store.dispatch('commitResetList')
       message.value = ''
       loadHolidays()
       signOut(auth)
@@ -249,25 +356,7 @@ export default {
     const shortEventsOnMonthView = ref(false)
     //↑======Vue-cal用======↑//
 
-    const employeeList = computed(()=> {
-      return store.getters.employeeListData
-    })
-
-    const arrangeEmployeeList = computed(()=> {
-      return store.getters.arrangeEmployeeListData
-    })
-
-    const employeeWeekendList = computed(()=> {
-      return store.getters.employeeWeekendListData
-    })
-
-    const arrangeWeekendEmployeeList = computed(()=> {
-      return store.getters.arrangeWeekendEmployeeListData
-    })
-
-    const directorList = computed(()=> {
-      return store.getters.directorListData
-    })
+    
 
     
     // const editEvents = computed({
@@ -329,7 +418,7 @@ export default {
       signUp,logout,login,
       save,
       // editEvents
-      // loadData
+      loadData,
       emailVerified,
       googleUserInfo,
       message
@@ -457,9 +546,11 @@ secondary_color = #e4f5ef
 .save
   top 40px
 .query
-  right 40px
+  right 200px
 .sign-up
   right 100px
+.add
+  right 200px
 
 .login,.logout
   display flex
