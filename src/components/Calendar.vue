@@ -3,7 +3,7 @@
 import VueCal from 'vue-cal'
 import 'vue-cal/dist/vuecal.css'
 import 'vue-cal/dist/i18n/zh-hk.js'
-import { ref,computed, onMounted } from '@vue/runtime-core';
+import { ref,computed, onMounted, reactive } from '@vue/runtime-core';
 import { useStore } from "vuex";
 import { apiTime,apiArrangeDateList, apiConvertor, apiHandleList } from '../api'
 
@@ -36,64 +36,70 @@ export default {
   },
 
   setup() {
-    // ↓===↓===↓===↓===↓===↓===↓ 自訂api引入 ↓===↓===↓===↓===↓===↓===↓ //
-    const { formatTime,theWeek } = apiTime()
+    const store = useStore()
 
+    // ↓===↓===↓===↓===↓===↓===↓ 自訂api引入 ↓===↓===↓===↓===↓===↓===↓ //
+    const {events,JSONToExcelConvertor,createCsvFile} = apiConvertor()
+    const { formatTime,theWeek } = apiTime()
     const { 
       arrange,
       handleHoliday 
     } = apiArrangeDateList()
-
     const { 
       handleEmployeeList,
       handleArrangeEmployeeList,
       handleWeekendEmployeeList,
       handleWeekendArrangeEmployeeList
     } = apiHandleList()
-
-    const {events,JSONToExcelConvertor,createCsvFile} = apiConvertor()
     // ↑===↑===↑===↑===↑===↑===↑ 自訂api引入 ↑===↑===↑===↑===↑===↑===↑ //
 
-    const store = useStore()
     initializeApp(firebaseConfig)
+    const db = getFirestore()
     const auth = getAuth()
-    
+    const provider = new GoogleAuthProvider()
+
+    // 限定某使用者
+    // googleUserInfo.value.user.uid 
+    const adminUid = ref('9AniJOfAMPXnN1xK5W8kevRGMdM2') //管理員的Uid寫在這
+    const adminUidExist = ref()
 
     const employeeList = computed(()=> {
       return store.getters.employeeListData
     })
-
     const arrangeEmployeeList = computed(()=> {
       return store.getters.arrangeEmployeeListData
     })
-
     const employeeWeekendList = computed(()=> {
       return store.getters.employeeWeekendListData
     })
-
     const arrangeWeekendEmployeeList = computed(()=> {
       return store.getters.arrangeWeekendEmployeeListData
     })
-
     const directorList = computed(()=> {
       return store.getters.directorListData
     })  
-
     const eventsData = computed(()=> {
       return store.getters.eventsData
     })
     const todayDate = computed(()=> {
       return store.getters.startTimeData
     })
-    const googleUserInfo = computed(()=> {
-      return store.getters.googleUserInfoData
+
+    const googleUserInfo = reactive({
+      uid: '',
+      displayName: '',
+      photoURL: ''
     })
+
+    // const googleUserInfo = computed(()=> {
+    //   return store.getters.googleUserInfoData
+    // })
 
     const emailVerified = ref(false)
 
     const message = ref('')
 
-    const db = getFirestore()
+    
 
     //使用者狀態監聽
     onAuthStateChanged(auth, (user)=> {
@@ -104,9 +110,6 @@ export default {
       }
       // console.log('user status changed:',user);
     })
-
-    //定義firebase資料庫集合位置
-    const colRef = collection(db,'holidaysData')
 
     //建立國定假日firebase文件才使用
     const add = (e)=> {
@@ -119,23 +122,24 @@ export default {
         employeeList: employeeData
       })
 
-      // setDoc(doc(db,'list','employeeWeekendList'),{
-      //   employeeWeekendList: employeeData
-      // })
+      setDoc(doc(db,'list','employeeWeekendList'),{
+        employeeWeekendList: employeeData
+      })
 
-      // setDoc(doc(db,'list','arrangeEmployeeList'),{
-      //   arrangeEmployeeList: []
-      // })
+      setDoc(doc(db,'list','arrangeEmployeeList'),{
+        arrangeEmployeeList: []
+      })
 
-      // setDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
-      //   arrangeWeekendEmployeeList: []
-      // })
+      setDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
+        arrangeWeekendEmployeeList: []
+      })
     }
     
     //更新firebase文件
     const update = (e)=> {
       e.preventDefault()
-      updateDoc(doc(db,'holidaysData',googleUserInfo.value.user.uid),{
+      
+      updateDoc(doc(db,'holidaysData',adminUid.value),{
         eventsData: eventsData.value
       })
     }
@@ -143,36 +147,38 @@ export default {
     //儲存資料到firebase
     const save = (e)=> {
       e.preventDefault()
-      getDocs(colRef).then((snapshot)=> {
-        snapshot.docs.forEach((userData)=> {
-          if(userData.id===googleUserInfo.value.user.uid) {
-            updateDoc(doc(db,'userDateData',googleUserInfo.value.user.uid),{
-              eventsData: eventsData.value
-            })
-          } else {
-            setDoc(doc(db,'userDateData',googleUserInfo.value.user.uid),{
-              eventsData: eventsData.value
-            })
-          }
+
+      getDocs(collection(db,'userDateData')).then((snapshot)=> {
+        if (adminUidExist.value && (adminUid.value === googleUserInfo.uid) ) {
+          updateDoc(doc(db,'userDateData',adminUid.value),{
+            eventsData: eventsData.value
+          })
+          updateDoc(doc(db,'list','employeeList'),{
+            employeeList: employeeList.value
+          })
+          updateDoc(doc(db,'list','employeeWeekendList'),{
+            employeeWeekendList: employeeWeekendList.value
+          })
+          updateDoc(doc(db,'list','arrangeEmployeeList'),{
+            arrangeEmployeeList: arrangeEmployeeList.value
+          })
+          updateDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
+            arrangeWeekendEmployeeList: arrangeWeekendEmployeeList.value
+          })
           message.value = '儲存成功'
-        })
+        } else if(!adminUidExist.value) {
+          console.log('set');
+          setDoc(doc(db,'userDateData',adminUid.value),{
+            eventsData: eventsData.value
+          })
+        }
+
       }).catch(err => {
         console.log(err.message);
         message.value = err.message
       })
       // console.log('ok');
-      updateDoc(doc(db,'list','employeeList'),{
-        employeeList: employeeList.value
-      })
-      updateDoc(doc(db,'list','employeeWeekendList'),{
-        employeeWeekendList: employeeWeekendList.value
-      })
-      updateDoc(doc(db,'list','arrangeEmployeeList'),{
-        arrangeEmployeeList: arrangeEmployeeList.value
-      })
-      updateDoc(doc(db,'list','arrangeWeekendEmployeeList'),{
-        arrangeWeekendEmployeeList: arrangeWeekendEmployeeList.value
-      })
+
 
     }
 
@@ -188,7 +194,7 @@ export default {
     const loadHolidays = ()=> {
       store.dispatch('commitDeleteEvents')
       store.dispatch('commitDeleteGoogleUserInfo')
-      getDocs(colRef).then((snapshot)=> {
+      getDocs(collection(db,'holidaysData')).then((snapshot)=> {
         snapshot.docs.forEach((data)=> {
           data.data().eventsData.forEach((event)=> {
             store.dispatch('commitEvents',event)
@@ -200,10 +206,16 @@ export default {
     //讀取使用者排班儲存的firebase資料
     const loadData = ()=> {
       store.dispatch('commitDeleteEvents')
+      //讀取登入帳號資料
       getDocs(collection(db,'userDateData'))
         .then((snapshot)=> {
+          adminUidExist.value = snapshot.docs.some((item)=> {
+            //判斷管理員帳號是否存在 且 登入帳號是否為管理員
+            return item.id === adminUid.value && item.id === googleUserInfo.uid
+          })
           snapshot.docs.forEach((userData)=> {
-            if(userData.id===googleUserInfo.value.user.uid) {
+            // googleUserInfo.value.user.uid
+            if(userData.id === adminUid.value) {
               userData.data().eventsData.forEach( (event)=> {
                 store.dispatch('commitEvents',event)
               })
@@ -213,7 +225,7 @@ export default {
         .catch(err => {
           console.log(err.message);
         })
-
+      //讀取排班人員資料
       getDocs(collection(db,'list'))
         .then((snapshot)=> {
           snapshot.docs.forEach((userData)=> {
@@ -244,38 +256,10 @@ export default {
         .catch(err => {
           console.log(err.message);
         })
-
-      // onSnapshot(collection(db,'list'),(snapshot)=> {
-      //   snapshot.docs.forEach((userData)=> {
-      //     switch(userData.id) {
-      //       case 'employeeList' :
-      //         userData.data().employeeList.forEach((item)=> {
-      //           store.dispatch('commitEmployeeList',item)
-      //         })
-      //         break
-      //       case 'employeeWeekendList' :
-      //         userData.data().employeeWeekendList.forEach((item)=> {
-      //           store.dispatch('commitEmployeeWeekendList',item)
-      //         })
-      //         break
-      //       case 'arrangeEmployeeList' :
-      //         userData.data().arrangeEmployeeList.forEach((item)=> {
-      //           store.dispatch('commitArrangeEmployeeList',item)
-      //         })
-      //         break
-      //       case 'arrangeWeekendEmployeeList' :
-      //         userData.data().arrangeWeekendEmployeeList.forEach((item)=> {
-      //           store.dispatch('commitArrangeWeekendEmployeeList',item)
-      //         })
-      //         break
-      //     }
-      //   })
-      // })
-
     }
 
     //查詢firebase
-    const q = query(colRef,where('start','==','zz'))
+    const q = query(collection(db,'holidaysData'),where('start','==','zz'))
 
     const que = ()=> {
       // onSnapshot(q,(snapshot)=> {
@@ -311,12 +295,11 @@ export default {
         .catch((err)=>{
           console.log(err.message);
         })
-      
     }
 
     //登入
     const login = async ()=> {
-      const provider = new GoogleAuthProvider()
+      
       //以郵箱帳密登入
       // signInWithEmailAndPassword(auth,email,password)
       //   .then((cred)=> {
@@ -330,7 +313,10 @@ export default {
         .then((result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
           const credential = GoogleAuthProvider.credentialFromResult(result);
-          store.dispatch('commitGoogleUserInfo',result)
+          console.log(result);
+          // store.dispatch('commitGoogleUserInfo',result)
+          
+          // {googleUserInfo.uid,googleUserInfo.displayName,googleUserInfo.photoURL} = result.user
 
           const token = credential.accessToken;
 
@@ -388,13 +374,11 @@ export default {
     })
 
     
-
     const isOpen = ref(false)
 
     const handleOpen = ()=> {
       isOpen.value = !isOpen.value
     }
-
 
     onMounted(()=> {
       logout()
@@ -421,7 +405,8 @@ export default {
       loadData,
       emailVerified,
       googleUserInfo,
-      message
+      message,
+      adminUidExist
     }
   }
 }
@@ -439,10 +424,10 @@ export default {
     //- .fab.fa-google
     h3 Google登入
     .fas.fa-sign-in-alt
-  .logout( v-if='emailVerified')
+  .logout( v-if='emailVerified' )
     //- .fab.fa-google
-    img(:src='googleUserInfo.user.photoURL', alt="alt")
-    h4 {{googleUserInfo.user.displayName}}
+    //- img(:src='googleUserInfo.user.photoURL', alt="alt")
+    //- h4 {{googleUserInfo.user.displayName}}
     .fas.fa-sign-out-alt(@click='logout')
     //- h4(@click='logout') 登出
   .switch
@@ -456,11 +441,11 @@ export default {
         h1 資訊室排班囉
         h5 created by ZhaoHouLin
 
-      .date
+      .date(v-if='adminUidExist')
         .startTime
           h3 開始日期
           input(type='date' v-model='startTimeStatus')
-        .endTime
+        .endTime(v-if='adminUidExist')
           h3 結束日期
           input(type='date' v-model='endTimeStatus')
     
@@ -471,30 +456,30 @@ export default {
           div(v-for='(item,id) in employeeList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
-            button.fas.fa-plus-square(@click='handleEmployeeList(item)')
+            button.fas.fa-plus-square(@click='handleEmployeeList(item)' v-if='adminUidExist')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
           h3 平日排班順序
           div(v-for='(item,id) in arrangeEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
-            button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)')
+            button.fas.fa-times-circle(@click='handleArrangeEmployeeList(item)' v-if='adminUidExist')
       .weekendList
         .employeeList 
           h3 假日排班人員
           div(v-for='(item,id) in employeeWeekendList' :key='item.name') 
             h4 {{item.name}}
             //- button.fas.fa-plus-circle(@click='handleEmployeeList(item)')
-            button.fas.fa-plus-square(@click='handleWeekendEmployeeList(item)')
+            button.fas.fa-plus-square(@click='handleWeekendEmployeeList(item)' v-if='adminUidExist')
         i.fas.fa-arrow-right
         .arrangeEmployeeList 
           h3 假日排班順序
           div(v-for='(item,id) in arrangeWeekendEmployeeList' :key='item.name')
             h4 {{formatTime(id+1)}}. {{item.name}} 
-            button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)')
+            button.fas.fa-times-circle(@click='handleWeekendArrangeEmployeeList(item)' v-if='adminUidExist')
 
     .input
       h4 {{message}}
-      .inputBtn
+      .inputBtn(v-if='adminUidExist')
         button(@click='arrange') 排班
         //- button(@click='createCsvFile') .csv班表下載
         button(@click='save') 儲存班表
