@@ -91,10 +91,6 @@ export default {
       photoURL: ''
     })
 
-    // const googleUserInfo = computed(()=> {
-    //   return store.getters.googleUserInfoData
-    // })
-
     const emailVerified = ref(false)
 
     const message = ref('')
@@ -214,7 +210,7 @@ export default {
             return item.id === adminUid.value && item.id === googleUserInfo.uid
           })
           snapshot.docs.forEach((userData)=> {
-            // googleUserInfo.value.user.uid
+            // googleUserInfo.uid
             if(userData.id === adminUid.value) {
               userData.data().eventsData.forEach( (event)=> {
                 store.dispatch('commitEvents',event)
@@ -313,10 +309,10 @@ export default {
         .then((result) => {
           // This gives you a Google Access Token. You can use it to access the Google API.
           const credential = GoogleAuthProvider.credentialFromResult(result);
-          console.log(result);
-          // store.dispatch('commitGoogleUserInfo',result)
-          
-          // {googleUserInfo.uid,googleUserInfo.displayName,googleUserInfo.photoURL} = result.user
+
+          googleUserInfo.uid = result.user.uid
+          googleUserInfo.displayName = result.user.displayName
+          googleUserInfo.photoURL = result.user.photoURL
 
           const token = credential.accessToken;
 
@@ -426,8 +422,8 @@ export default {
     .fas.fa-sign-in-alt
   .logout( v-if='emailVerified' )
     //- .fab.fa-google
-    //- img(:src='googleUserInfo.user.photoURL', alt="alt")
-    //- h4 {{googleUserInfo.user.displayName}}
+    img(:src='googleUserInfo.photoURL', alt="alt")
+    h4 {{googleUserInfo.displayName}}
     .fas.fa-sign-out-alt(@click='logout')
     //- h4(@click='logout') 登出
   .switch

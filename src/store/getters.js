@@ -24,7 +24,5 @@ export default {
   endTimeData(state) {
     return state.endTime
   },
-  googleUserInfoData(state) {
-    return state.googleUserInfo
-  }
+
 }

@@ -6,9 +6,6 @@ export default {
     state.arrangeWeekendEmployeeList = []
   },
 
-  stateGoogleUserInfo(state,payload) {
-    state.googleUserInfo = payload
-  },
   stateDeleteGoogleUserInfo(state) {
     state.googleUserInfo = null
   },

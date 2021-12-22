@@ -17,10 +17,4 @@ export default {
   events: [],
   startTime: startTime,
   endTime: startTime,
-  googleUserInfo: {
-    user:{
-      photoURL:'',
-      displayName:''
-    }
-  }
 }

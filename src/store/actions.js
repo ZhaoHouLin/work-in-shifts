@@ -3,9 +3,7 @@ export default {
     commit('stateResetList')
   },
 
-  commitGoogleUserInfo({ commit },payload) {
-    commit('stateGoogleUserInfo',payload)
-  },
+
   commitDeleteGoogleUserInfo({ commit }) {
     commit('stateDeleteGoogleUserInfo')
   },
